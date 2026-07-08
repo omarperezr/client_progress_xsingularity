@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Company {
+  id           Int       @id @default(autoincrement())
+  name         String
+  username     String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  projects     Project[]
+}
+
+model Project {
+  id        Int      @id @default(autoincrement())
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name      String
+  /// "github" | "gitlab"
+  provider  String
+  /// GitHub: "owner/repo". GitLab: numeric project id or "group/project" path.
+  repo      String
+  /// Optional API host override (GitHub Enterprise / self-managed GitLab).
+  baseUrl   String?
+  /// Read-only access token for the repo's issues.
+  token     String
+  createdAt DateTime @default(now())
+}
