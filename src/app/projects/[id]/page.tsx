@@ -59,6 +59,7 @@ export default async function ProjectPage({
 
 function ProjectDetails({ issues }: { issues: NormalizedIssue[] }) {
   const progress = computeProgress(issues);
+  const hasTimeSpent = issues.some((i) => i.spentMinutes !== null);
   const sorted = [...issues].sort((a, b) =>
     a.state === b.state ? a.id - b.id : a.state === "open" ? -1 : 1,
   );
@@ -72,10 +73,15 @@ function ProjectDetails({ issues }: { issues: NormalizedIssue[] }) {
             <ProgressBar percent={progress.percentByTime} label="Progress by estimated time" />
           </div>
         )}
-        <dl className="mt-5 grid grid-cols-2 gap-3 text-center text-sm sm:grid-cols-4">
+        <dl
+          className={`mt-5 grid grid-cols-2 gap-3 text-center text-sm ${hasTimeSpent ? "sm:grid-cols-5" : "sm:grid-cols-4"}`}
+        >
           <Stat label="Tasks done" value={`${progress.closedIssues}/${progress.totalIssues}`} />
           <Stat label="Est. project total" value={formatMinutes(progress.totalMinutes) ?? "—"} />
           <Stat label="Est. completed" value={formatMinutes(progress.doneMinutes) ?? "—"} />
+          {hasTimeSpent && (
+            <Stat label="Time logged" value={formatMinutes(progress.spentMinutes) ?? "—"} />
+          )}
           <Stat label="Est. remaining" value={formatMinutes(progress.remainingMinutes) ?? "—"} />
         </dl>
       </section>
@@ -92,6 +98,7 @@ function ProjectDetails({ issues }: { issues: NormalizedIssue[] }) {
                 <th className="px-4 py-3 font-medium">Task</th>
                 <th className="px-4 py-3 font-medium">Assigned to</th>
                 <th className="px-4 py-3 font-medium">Estimate</th>
+                {hasTimeSpent && <th className="px-4 py-3 font-medium">Time spent</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800 bg-zinc-950">
@@ -124,11 +131,16 @@ function ProjectDetails({ issues }: { issues: NormalizedIssue[] }) {
                   <td className="px-4 py-3 text-zinc-400">
                     {formatMinutes(issue.estimateMinutes) ?? "—"}
                   </td>
+                  {hasTimeSpent && (
+                    <td className="px-4 py-3 text-zinc-400">
+                      {formatMinutes(issue.spentMinutes) ?? "—"}
+                    </td>
+                  )}
                 </tr>
               ))}
               {sorted.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-zinc-500">
+                  <td colSpan={hasTimeSpent ? 5 : 4} className="px-4 py-6 text-center text-zinc-500">
                     No tasks created yet.
                   </td>
                 </tr>

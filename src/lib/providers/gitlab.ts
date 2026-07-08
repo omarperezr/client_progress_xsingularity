@@ -10,7 +10,7 @@ interface GitLabIssue {
   description: string | null;
   assignees: { username: string }[] | null;
   labels: string[] | null;
-  time_stats?: { time_estimate: number };
+  time_stats?: { time_estimate: number; total_time_spent: number };
   web_url: string;
   updated_at: string;
 }
@@ -55,6 +55,9 @@ export async function fetchIssues(project: ProviderProject): Promise<NormalizedI
     estimateMinutes: issue.time_stats?.time_estimate
       ? Math.round(issue.time_stats.time_estimate / 60)
       : estimateFromBody(issue.description) ?? estimateFromLabels(issue.labels),
+    spentMinutes: issue.time_stats?.total_time_spent
+      ? Math.round(issue.time_stats.total_time_spent / 60)
+      : null,
     url: issue.web_url,
     updatedAt: issue.updated_at,
   }));

@@ -57,6 +57,7 @@ export async function fetchIssues(project: ProviderProject): Promise<NormalizedI
         assignees: (issue.assignees ?? []).map((a) => a.login),
         labels,
         estimateMinutes: estimateFromBody(issue.body) ?? estimateFromLabels(labels),
+        spentMinutes: null,
         url: issue.html_url,
         updatedAt: issue.updated_at,
       } satisfies NormalizedIssue;

@@ -7,6 +7,8 @@ export interface NormalizedIssue {
   assignees: string[];
   labels: string[];
   estimateMinutes: number | null;
+  /** Time the team logged on the issue (GitLab "time spent"); null when unsupported. */
+  spentMinutes: number | null;
   url: string;
   updatedAt: string;
 }

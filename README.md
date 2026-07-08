@@ -99,11 +99,12 @@ Note: pull requests are automatically excluded — only real issues count toward
 1. **Create the project** and its issue board (Kanban).
 2. **Create all issues at kick-off.**
 3. **Put the time estimate inside each issue.** Preferred: GitLab's **native time tracking** — comment `/estimate 2d 4h` on the issue (shows up in the sidebar). Fallbacks: an `Estimate: 2d 4h` line in the description, or a label `estimate::4h`.
-4. **Assign issues.**
-5. **Create a read-only token**: Project → *Settings* → *Access tokens* → *Add new token*:
+4. **Log time as you work** with `/spend 3h` — the app subtracts logged time from each open issue's estimate when computing the remaining project time, and shows a "Time spent" column to the client.
+5. **Assign issues.**
+6. **Create a read-only token**: Project → *Settings* → *Access tokens* → *Add new token*:
    - **Role**: Reporter
    - **Scopes**: `read_api`
-6. **Register the project** (repo can be the numeric project ID from the project's *General* settings, or the full path):
+7. **Register the project** (repo can be the numeric project ID from the project's *General* settings, or the full path):
    ```bash
    npm run add-project -- acme "Acme Mobile App" gitlab acme-group/mobile-app glpat-XXXX
    # or, with the numeric ID and a self-managed instance:
@@ -113,8 +114,9 @@ Note: pull requests are automatically excluded — only real issues count toward
 ## How progress is calculated
 
 - **Progress bar (by tasks)**: `closed issues / all issues`.
-- **Progress bar (by time)**: `estimated minutes of closed issues / estimated minutes of all issues` (shown when estimates exist).
-- **Project total estimate**: sum of every issue's estimate. *Remaining* = total − closed.
+- **Progress bar (by time)**: `completed estimated minutes / total estimated minutes` (shown when estimates exist).
+- **Project total estimate**: sum of every issue's estimate.
+- **Remaining time**: per issue — `0` once closed; otherwise `estimate − time spent` (never below 0), summed. *Time spent* comes from GitLab's time tracking (`/spend 3h` quick action); GitHub has no equivalent, so there remaining = estimate of open issues.
 - Estimates are parsed from (first match wins): GitLab native time tracking → `Estimate:` line in the issue body/description → `estimate:` label.
 
 ## CLI reference

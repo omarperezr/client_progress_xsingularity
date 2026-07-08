@@ -26,14 +26,22 @@ export interface ProjectProgress {
   totalMinutes: number;
   doneMinutes: number;
   remainingMinutes: number;
+  /** Total time the team logged on issues (GitLab "time spent"); 0 when unsupported. */
+  spentMinutes: number;
 }
 
+/**
+ * Remaining time per issue: 0 once closed; otherwise the estimate minus any
+ * time the team already logged on it (GitLab "time spent"), never below 0.
+ */
 export function computeProgress(issues: NormalizedIssue[]): ProjectProgress {
   const closed = issues.filter((i) => i.state === "closed");
-  const sum = (list: NormalizedIssue[]) =>
-    list.reduce((acc, i) => acc + (i.estimateMinutes ?? 0), 0);
-  const totalMinutes = sum(issues);
-  const doneMinutes = sum(closed);
+  const totalMinutes = issues.reduce((acc, i) => acc + (i.estimateMinutes ?? 0), 0);
+  const remainingMinutes = issues.reduce((acc, i) => {
+    if (i.state === "closed") return acc;
+    return acc + Math.max((i.estimateMinutes ?? 0) - (i.spentMinutes ?? 0), 0);
+  }, 0);
+  const doneMinutes = totalMinutes - remainingMinutes;
   return {
     totalIssues: issues.length,
     closedIssues: closed.length,
@@ -41,6 +49,7 @@ export function computeProgress(issues: NormalizedIssue[]): ProjectProgress {
     percentByTime: totalMinutes ? Math.round((doneMinutes / totalMinutes) * 100) : null,
     totalMinutes,
     doneMinutes,
-    remainingMinutes: totalMinutes - doneMinutes,
+    remainingMinutes,
+    spentMinutes: issues.reduce((acc, i) => acc + (i.spentMinutes ?? 0), 0),
   };
 }
