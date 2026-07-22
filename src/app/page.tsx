@@ -3,8 +3,10 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSessionCompany } from "@/lib/auth";
 import { fetchIssues, computeProgress, type ProjectProgress } from "@/lib/providers";
+import { computeAnalytics, type Forecast } from "@/lib/analytics";
 import { formatMinutes } from "@/lib/estimate";
 import { Header } from "@/components/Header";
+import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { ProgressBar } from "@/components/ProgressBar";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +19,25 @@ interface ProjectCard {
   provider: string;
   repo: string;
   progress: ProjectProgress | null;
+  forecast: Forecast | null;
+}
+
+/** One-line finish estimate for a project card. */
+function forecastLabel(f: Forecast): string {
+  switch (f.status) {
+    case "complete":
+      return "Complete";
+    case "projected":
+      return `Est. finish ${new Date(f.etaDate!).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })}`;
+    case "stalled":
+      return "No recent activity";
+    default:
+      return "Getting started";
+  }
 }
 
 export default async function DashboardPage() {
@@ -32,16 +53,24 @@ export default async function DashboardPage() {
     projects.map(async (p) => {
       try {
         const issues = await fetchIssues(p.provider, p);
-        return { id: p.id, name: p.name, provider: p.provider, repo: p.repo, progress: computeProgress(issues) };
+        return {
+          id: p.id,
+          name: p.name,
+          provider: p.provider,
+          repo: p.repo,
+          progress: computeProgress(issues),
+          forecast: computeAnalytics(issues).forecast,
+        };
       } catch (err) {
         console.error(`Failed to fetch issues for project ${p.id}:`, err);
-        return { id: p.id, name: p.name, provider: p.provider, repo: p.repo, progress: null };
+        return { id: p.id, name: p.name, provider: p.provider, repo: p.repo, progress: null, forecast: null };
       }
     }),
   );
 
   return (
     <div className="min-h-screen w-full bg-zinc-950">
+      <ImpersonationBanner companyName={company.name} />
       <Header companyName={company.name} />
       <main className="mx-auto w-full max-w-5xl px-4 py-8">
         <h1 className="mb-6 text-xl font-semibold text-white">Your projects</h1>
@@ -86,6 +115,20 @@ export default async function DashboardPage() {
                       </dd>
                     </div>
                   </dl>
+                  {card.forecast && (
+                    <p className="mt-3 flex items-center gap-1.5 text-xs text-zinc-400">
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          card.forecast.status === "complete"
+                            ? "bg-emerald-500"
+                            : card.forecast.status === "stalled"
+                              ? "bg-amber-500"
+                              : "bg-indigo-500"
+                        }`}
+                      />
+                      {forecastLabel(card.forecast)}
+                    </p>
+                  )}
                 </>
               ) : (
                 <p className="text-sm text-red-400">

@@ -11,6 +11,18 @@ export interface NormalizedIssue {
   spentMinutes: number | null;
   url: string;
   updatedAt: string;
+  /** When the issue was closed (ISO); null while open. Drives velocity + forecast. */
+  closedAt: string | null;
+  /** Number of comments/notes on the issue, when the provider reports it cheaply. */
+  commentCount: number;
+}
+
+export interface NormalizedComment {
+  id: number;
+  author: string;
+  body: string;
+  createdAt: string;
+  url: string | null;
 }
 
 export interface ProviderProject {

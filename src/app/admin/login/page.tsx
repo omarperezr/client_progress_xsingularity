@@ -1,40 +1,31 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getSessionCompany } from "@/lib/auth";
-import { login } from "../actions";
+import { getAdmin } from "@/lib/admin-auth";
+import { adminLogin } from "../actions";
 
-export const metadata = { title: "Sign in · Client Progress" };
+export const metadata = { title: "Admin sign in · Client Progress" };
 
-const ERROR_MESSAGES: Record<string, string> = {
-  missing: "Please enter your username and password.",
-  invalid: "Invalid username or password.",
-};
-
-export default async function LoginPage({
+export default async function AdminLoginPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  if (await getSessionCompany()) redirect("/");
+  if (await getAdmin()) redirect("/admin");
   const { error } = await searchParams;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
-            Client Progress
-          </h1>
-          <p className="mt-1 text-sm text-zinc-400">by xSingularity</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">Admin</h1>
+          <p className="mt-1 text-sm text-zinc-400">xSingularity · Client Progress</p>
         </div>
         <form
-          action={login}
+          action={adminLogin}
           className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl"
         >
           {error && (
-            <p className="rounded-md bg-red-500/10 px-3 py-2 text-sm text-red-400">
-              {ERROR_MESSAGES[error] ?? "Something went wrong. Try again."}
-            </p>
+            <p className="rounded-md bg-red-500/10 px-3 py-2 text-sm text-red-400">{error}</p>
           )}
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-zinc-300">Username</span>
@@ -63,9 +54,9 @@ export default async function LoginPage({
           </button>
         </form>
         <p className="mt-6 text-center text-sm text-zinc-500">
-          xSingularity team?{" "}
-          <Link href="/admin/login" className="text-indigo-400 hover:text-indigo-300">
-            Admin sign-in
+          Are you a client?{" "}
+          <Link href="/login" className="text-indigo-400 hover:text-indigo-300">
+            Client sign-in
           </Link>
         </p>
       </div>

@@ -1,5 +1,5 @@
 import { estimateFromBody, estimateFromLabels } from "../estimate";
-import type { NormalizedIssue, ProviderProject } from "./types";
+import type { NormalizedComment, NormalizedIssue, ProviderProject } from "./types";
 
 const DEFAULT_API = "https://api.github.com";
 
@@ -12,22 +12,41 @@ interface GitHubIssue {
   labels: (string | { name: string })[] | null;
   html_url: string;
   updated_at: string;
+  closed_at: string | null;
+  comments: number;
   pull_request?: unknown;
+}
+
+interface GitHubComment {
+  id: number;
+  user: { login: string } | null;
+  body: string;
+  created_at: string;
+  html_url: string;
+}
+
+function headers(token: string) {
+  return {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    "User-Agent": "client-progress-xsingularity",
+  };
+}
+
+async function api<T>(url: string, token: string): Promise<T> {
+  const res = await fetch(url, { headers: headers(token), cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`GitHub API ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  }
+  return res.json() as Promise<T>;
 }
 
 async function fetchAllPages(url: string, token: string): Promise<GitHubIssue[]> {
   const items: GitHubIssue[] = [];
   let next: string | null = url;
   while (next) {
-    const res: Response = await fetch(next, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "client-progress-xsingularity",
-      },
-      cache: "no-store",
-    });
+    const res: Response = await fetch(next, { headers: headers(token), cache: "no-store" });
     if (!res.ok) {
       throw new Error(`GitHub API ${res.status}: ${(await res.text()).slice(0, 200)}`);
     }
@@ -60,6 +79,52 @@ export async function fetchIssues(project: ProviderProject): Promise<NormalizedI
         spentMinutes: null,
         url: issue.html_url,
         updatedAt: issue.updated_at,
+        closedAt: issue.closed_at,
+        commentCount: issue.comments ?? 0,
       } satisfies NormalizedIssue;
     });
+}
+
+export async function fetchComments(
+  project: ProviderProject,
+  issueId: number,
+): Promise<NormalizedComment[]> {
+  const host = project.baseUrl || DEFAULT_API;
+  const raw = await api<GitHubComment[]>(
+    `${host}/repos/${project.repo}/issues/${issueId}/comments?per_page=100`,
+    project.token,
+  );
+  return raw.map((c) => ({
+    id: c.id,
+    author: c.user?.login ?? "unknown",
+    body: c.body ?? "",
+    createdAt: c.created_at,
+    url: c.html_url,
+  }));
+}
+
+/** Posts a comment on the issue. Requires a token with Issues: Read & write. */
+export async function postComment(
+  project: ProviderProject,
+  issueId: number,
+  body: string,
+): Promise<NormalizedComment> {
+  const host = project.baseUrl || DEFAULT_API;
+  const res = await fetch(`${host}/repos/${project.repo}/issues/${issueId}/comments`, {
+    method: "POST",
+    headers: { ...headers(project.token), "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify({ body }),
+  });
+  if (!res.ok) {
+    throw new Error(`GitHub API ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  }
+  const c: GitHubComment = await res.json();
+  return {
+    id: c.id,
+    author: c.user?.login ?? "unknown",
+    body: c.body ?? "",
+    createdAt: c.created_at,
+    url: c.html_url,
+  };
 }

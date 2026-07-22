@@ -1,5 +1,5 @@
 import { estimateFromBody, estimateFromLabels } from "../estimate";
-import type { NormalizedIssue, ProviderProject } from "./types";
+import type { NormalizedComment, NormalizedIssue, ProviderProject } from "./types";
 
 const DEFAULT_HOST = "https://gitlab.com";
 
@@ -11,8 +11,26 @@ interface GitLabIssue {
   assignees: { username: string }[] | null;
   labels: string[] | null;
   time_stats?: { time_estimate: number; total_time_spent: number };
+  user_notes_count?: number;
   web_url: string;
   updated_at: string;
+  closed_at: string | null;
+}
+
+interface GitLabNote {
+  id: number;
+  author: { username: string } | null;
+  body: string;
+  created_at: string;
+  system: boolean;
+}
+
+async function api<T>(url: string, token: string): Promise<T> {
+  const res = await fetch(url, { headers: { "PRIVATE-TOKEN": token }, cache: "no-store" });
+  if (!res.ok) {
+    throw new Error(`GitLab API ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  }
+  return res.json() as Promise<T>;
 }
 
 async function fetchAllPages(url: string, token: string): Promise<GitLabIssue[]> {
@@ -60,5 +78,58 @@ export async function fetchIssues(project: ProviderProject): Promise<NormalizedI
       : null,
     url: issue.web_url,
     updatedAt: issue.updated_at,
+    closedAt: issue.closed_at,
+    commentCount: issue.user_notes_count ?? 0,
   }));
+}
+
+function issuePath(project: ProviderProject, issueId: number) {
+  const host = project.baseUrl || DEFAULT_HOST;
+  const id = encodeURIComponent(project.repo);
+  return `${host}/api/v4/projects/${id}/issues/${issueId}`;
+}
+
+export async function fetchComments(
+  project: ProviderProject,
+  issueId: number,
+): Promise<NormalizedComment[]> {
+  const raw = await api<GitLabNote[]>(
+    `${issuePath(project, issueId)}/notes?per_page=100&sort=asc&order_by=created_at`,
+    project.token,
+  );
+  return raw
+    // System notes are automated ("changed status to closed"); show only real discussion.
+    .filter((n) => !n.system)
+    .map((n) => ({
+      id: n.id,
+      author: n.author?.username ?? "unknown",
+      body: n.body ?? "",
+      createdAt: n.created_at,
+      url: null,
+    }));
+}
+
+/** Posts a note on the issue. Requires a token with the `api` scope (Developer role). */
+export async function postComment(
+  project: ProviderProject,
+  issueId: number,
+  body: string,
+): Promise<NormalizedComment> {
+  const res = await fetch(`${issuePath(project, issueId)}/notes`, {
+    method: "POST",
+    headers: { "PRIVATE-TOKEN": project.token, "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify({ body }),
+  });
+  if (!res.ok) {
+    throw new Error(`GitLab API ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  }
+  const n: GitLabNote = await res.json();
+  return {
+    id: n.id,
+    author: n.author?.username ?? "unknown",
+    body: n.body ?? "",
+    createdAt: n.created_at,
+    url: null,
+  };
 }
