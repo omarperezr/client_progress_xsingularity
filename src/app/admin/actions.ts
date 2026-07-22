@@ -30,10 +30,16 @@ export async function adminLogin(formData: FormData) {
   const username = text(formData, "username");
   const password = String(formData.get("password") ?? "");
   if (!username || !password) back("/admin/login", "Enter a username and password.");
-  if (!verifyAdminCredentials(username, password)) {
-    back("/admin/login", "Invalid admin credentials.");
+  let ok = false;
+  try {
+    ok = verifyAdminCredentials(username, password);
+    if (ok) await createAdminSession(username);
+  } catch (err) {
+    // Missing ADMIN_USERNAME / ADMIN_PASSWORD / SESSION_SECRET env vars land here.
+    console.error("adminLogin misconfiguration:", err);
+    back("/admin/login", "Server configuration error — check the deployment's environment variables.");
   }
-  await createAdminSession(username);
+  if (!ok) back("/admin/login", "Invalid admin credentials.");
   redirect("/admin");
 }
 
