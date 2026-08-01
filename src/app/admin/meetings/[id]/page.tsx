@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin-auth";
 import { AdminHeader } from "@/components/AdminHeader";
 import { Banner, Card, DangerButton, DangerZone, Field, SubmitButton } from "@/components/AdminForm";
+import { PendingButton } from "@/components/PendingButton";
 import {
   addDraftIssue,
   analyzeMeeting,
@@ -83,7 +84,7 @@ export default async function MeetingPage({
             >
               <form action={analyzeMeeting} className="mb-5">
                 <input type="hidden" name="id" value={meeting.id} />
-                <SubmitButton>
+                <SubmitButton pendingText="Analyzing transcript…">
                   {meeting.draftIssues.length ? "Re-analyze transcript (adds drafts)" : "Generate draft issues"}
                 </SubmitButton>
               </form>
@@ -133,9 +134,12 @@ export default async function MeetingPage({
                     </form>
                     <form action={deleteDraftIssue} className="mt-2">
                       <input type="hidden" name="id" value={draft.id} />
-                      <button className="text-sm text-red-400 hover:text-red-300">
+                      <PendingButton
+                        pendingText="Discarding…"
+                        className="text-sm text-red-400 hover:text-red-300"
+                      >
                         Discard draft
-                      </button>
+                      </PendingButton>
                     </form>
                   </details>
                 ))}
@@ -149,7 +153,7 @@ export default async function MeetingPage({
               {drafts.length > 0 && (
                 <form action={pushDraftIssues} className="mt-6">
                   <input type="hidden" name="meetingId" value={meeting.id} />
-                  <SubmitButton>
+                  <SubmitButton pendingText="Pushing to GitLab…">
                     {`Push ${drafts.length} issue${drafts.length === 1 ? "" : "s"} to GitLab`}
                   </SubmitButton>
                 </form>

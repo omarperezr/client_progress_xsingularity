@@ -1,3 +1,5 @@
+import { PendingButton } from "./PendingButton";
+
 const INPUT =
   "w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500";
 
@@ -74,14 +76,20 @@ export function SelectField({
   );
 }
 
-export function SubmitButton({ children }: { children: React.ReactNode }) {
+export function SubmitButton({
+  children,
+  pendingText,
+}: {
+  children: React.ReactNode;
+  pendingText?: string;
+}) {
   return (
-    <button
-      type="submit"
+    <PendingButton
+      pendingText={pendingText}
       className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
     >
       {children}
-    </button>
+    </PendingButton>
   );
 }
 
@@ -109,12 +117,12 @@ export function DangerZone({
 
 export function DangerButton({ children }: { children: React.ReactNode }) {
   return (
-    <button
-      type="submit"
+    <PendingButton
+      pendingText="Deleting…"
       className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-500"
     >
       {children}
-    </button>
+    </PendingButton>
   );
 }
 

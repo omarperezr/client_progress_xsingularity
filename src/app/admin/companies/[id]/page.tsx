@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { fetchIssues, computeProgress, type ProjectProgress } from "@/lib/providers";
 import { formatMinutes } from "@/lib/estimate";
 import { AdminHeader } from "@/components/AdminHeader";
+import { PendingButton } from "@/components/PendingButton";
 import { ProgressBar } from "@/components/ProgressBar";
 import {
   Banner,
@@ -66,13 +67,12 @@ export default async function AdminCompanyPage({
           <h1 className="text-xl font-semibold text-white">{company.name}</h1>
           <form action={impersonateCompany}>
             <input type="hidden" name="id" value={company.id} />
-            <button
-              type="submit"
+            <PendingButton
               className="rounded-md border border-indigo-500/40 px-3 py-1.5 text-sm text-indigo-300 transition hover:bg-indigo-500/10"
               title="Open this client's own dashboard"
             >
               View as {company.name}
-            </button>
+            </PendingButton>
           </form>
         </div>
         <Banner ok={ok} error={error} />
@@ -136,7 +136,7 @@ export default async function AdminCompanyPage({
                   placeholder="Inventario y punto de venta"
                   hint="Gives the AI context when drafting issues from the kick-off call."
                 />
-                <SubmitButton>Create repo & project</SubmitButton>
+                <SubmitButton pendingText="Creating repo…">Create repo & project</SubmitButton>
               </form>
             </Card>
 

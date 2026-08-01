@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { adminLogout } from "@/app/admin/actions";
+import { PendingButton } from "./PendingButton";
 
 export function AdminHeader({ admin }: { admin: string }) {
   return (
@@ -16,12 +17,9 @@ export function AdminHeader({ admin }: { admin: string }) {
             {admin}
           </span>
           <form action={adminLogout}>
-            <button
-              type="submit"
-              className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:bg-zinc-800"
-            >
+            <PendingButton className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:bg-zinc-800">
               Sign out
-            </button>
+            </PendingButton>
           </form>
         </div>
       </div>

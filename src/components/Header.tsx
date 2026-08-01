@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { logout } from "@/app/actions";
+import { PendingButton } from "./PendingButton";
 
 export function Header({ companyName }: { companyName: string }) {
   return (
@@ -11,12 +12,9 @@ export function Header({ companyName }: { companyName: string }) {
         <div className="flex items-center gap-4">
           <span className="text-sm text-zinc-400">{companyName}</span>
           <form action={logout}>
-            <button
-              type="submit"
-              className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:bg-zinc-800"
-            >
+            <PendingButton className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition hover:bg-zinc-800">
               Sign out
-            </button>
+            </PendingButton>
           </form>
         </div>
       </div>

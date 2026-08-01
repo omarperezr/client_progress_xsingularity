@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PendingButton } from "@/components/PendingButton";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin-auth";
 import { fetchIssues, computeProgress, type ProjectProgress } from "@/lib/providers";
@@ -241,13 +242,12 @@ export default async function AdminPage({
                     <div className="flex shrink-0 items-center gap-2">
                       <form action={impersonateCompany}>
                         <input type="hidden" name="id" value={company.id} />
-                        <button
-                          type="submit"
+                        <PendingButton
                           className="rounded-md border border-indigo-500/40 px-3 py-1.5 text-xs text-indigo-300 transition hover:bg-indigo-500/10"
                           title="Open this client's own dashboard"
                         >
                           View as
-                        </button>
+                        </PendingButton>
                       </form>
                       <Link
                         href={`/admin/companies/${company.id}`}

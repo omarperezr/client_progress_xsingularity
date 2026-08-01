@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdmin } from "@/lib/admin-auth";
+import { PendingButton } from "@/components/PendingButton";
 import { adminLogin } from "../actions";
 
 export const metadata = { title: "Admin sign in · Client Progress" };
@@ -46,12 +47,12 @@ export default async function AdminLoginPage({
               className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500"
             />
           </label>
-          <button
-            type="submit"
+          <PendingButton
+            pendingText="Signing in…"
             className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
           >
             Sign in
-          </button>
+          </PendingButton>
         </form>
         <p className="mt-6 text-center text-sm text-zinc-500">
           Are you a client?{" "}
