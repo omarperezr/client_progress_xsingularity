@@ -16,9 +16,12 @@ import {
   SelectField,
   SubmitButton,
 } from "@/components/AdminForm";
+import { MeetingUpload } from "@/components/MeetingUpload";
 import { deleteProject, updateProject } from "../../actions";
 
 export const dynamic = "force-dynamic";
+// Uploading a meeting ends with a Groq Whisper call; allow more than the default runtime.
+export const maxDuration = 60;
 
 export default async function AdminProjectPage({
   params,
@@ -33,7 +36,10 @@ export default async function AdminProjectPage({
 
   const project = await prisma.project.findUnique({
     where: { id: Number(id) || 0 },
-    include: { company: true },
+    include: {
+      company: true,
+      meetings: { orderBy: { createdAt: "desc" }, include: { _count: { select: { draftIssues: true } } } },
+    },
   });
   if (!project) notFound();
 
@@ -168,6 +174,32 @@ export default async function AdminProjectPage({
           </div>
 
           <div className="space-y-6">
+            <Card
+              title="Meetings"
+              description="Upload the kick-off recording; Whisper transcribes it and the AI drafts issues for review."
+            >
+              <MeetingUpload projectId={project.id} />
+              {project.meetings.length > 0 && (
+                <ul className="mt-4 space-y-2">
+                  {project.meetings.map((m) => (
+                    <li key={m.id}>
+                      <Link
+                        href={`/admin/meetings/${m.id}`}
+                        className="text-sm text-zinc-200 hover:underline"
+                      >
+                        {m.filename}
+                      </Link>
+                      <span className="ml-2 text-xs text-zinc-500">
+                        {m.status}
+                        {m._count.draftIssues ? ` · ${m._count.draftIssues} drafts` : ""} ·{" "}
+                        {m.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+
             <Card title="Settings">
               <form action={updateProject} className="space-y-3">
                 <input type="hidden" name="id" value={project.id} />

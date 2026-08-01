@@ -15,7 +15,13 @@ import {
   SelectField,
   SubmitButton,
 } from "@/components/AdminForm";
-import { createProject, deleteCompany, impersonateCompany, updateCompany } from "../../actions";
+import {
+  createProject,
+  createProjectWithRepo,
+  deleteCompany,
+  impersonateCompany,
+  updateCompany,
+} from "../../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -117,7 +123,24 @@ export default async function AdminCompanyPage({
               )}
             </Card>
 
-            <Card title="Add project" description="Links a GitHub or GitLab repo to this client.">
+            <Card
+              title="Approve project — create GitLab repo"
+              description="The intake path: approving a sold package creates the private GitLab repository and links it here in one step."
+            >
+              <form action={createProjectWithRepo} className="space-y-3">
+                <input type="hidden" name="companyId" value={company.id} />
+                <Field label="Project name" name="name" required placeholder="Acme inventory" />
+                <Field
+                  label="Package sold (optional)"
+                  name="package"
+                  placeholder="Inventario y punto de venta"
+                  hint="Gives the AI context when drafting issues from the kick-off call."
+                />
+                <SubmitButton>Create repo & project</SubmitButton>
+              </form>
+            </Card>
+
+            <Card title="Add existing project" description="Links a GitHub or GitLab repo to this client.">
               <form action={createProject} className="space-y-3">
                 <input type="hidden" name="companyId" value={company.id} />
                 <Field label="Project name" name="name" required placeholder="Acme Webshop" />

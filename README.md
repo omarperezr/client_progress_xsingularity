@@ -59,7 +59,18 @@ Everything below can be done from the browser at **`/admin`** instead of the CLI
 | `/admin` | Global overview: clients, projects, tasks done, remaining time, and **unanswered client messages**. Per-project progress bar + forecast, a **needs-attention** list (stalled/idle projects), a preview of the message inbox, and **View as** to open any client's dashboard. Create a client. |
 | `/admin/inbox` | Every comment clients left on their tasks through the app, split into **Awaiting reply** (no team response since the client's last message) and **Answered**, each linking straight to the issue. |
 | `/admin/companies/<id>` | Rename a client, change its username, reset its password, add projects, **View as** the client, delete the client (cascades to its projects). |
-| `/admin/projects/<id>` | Edit name, provider, repo, base URL, replace the token, move the project to another client, delete it. Also shows the live issue list exactly as the app reads it — the fastest way to debug a bad repo path or token. |
+| `/admin/projects/<id>` | Edit name, provider, repo, base URL, replace the token, move the project to another client, delete it. Also shows the live issue list exactly as the app reads it — the fastest way to debug a bad repo path or token. Upload kick-off meeting recordings for transcription. |
+| `/admin/meetings/<id>` | Meeting transcript, AI-drafted issues, and the review flow: edit/discard drafts, add your own, then push the confirmed set to GitLab. |
+
+### Project intake: from sold package to GitLab issues
+
+The intake pipeline turns a closed sale into a planned project without leaving the panel. Requires `GROQ_API_KEY` (free, [console.groq.com](https://console.groq.com)) and `GITLAB_ADMIN_TOKEN` (`api` scope; optional `GITLAB_NAMESPACE_ID` to create repos under a group).
+
+1. **Approve** — on the client's page, "Approve project — create GitLab repo" creates a private GitLab repository and the linked project in one step. Record the package sold; it becomes context for the AI.
+2. **Upload the call** — on the project page, upload the Zoom recording. Prefer the audio-only `.m4a` (Zoom Settings → Recording → *Record a separate audio file*); the 25MB limit fits ~45–60 min of audio. The file uploads in chunks, is transcribed with Groq Whisper, and the audio is deleted immediately after — only the transcript is stored.
+3. **Analyze** — on the meeting page, "Generate draft issues" has a free LLM extract each client requirement and draft issues (title, Markdown description with acceptance criteria, estimate in hours).
+4. **Review** — developers edit, discard, or add drafts. Nothing touches GitLab yet.
+5. **Push** — one click creates every remaining draft as a real GitLab issue with its native time estimate. The progress dashboard picks them up immediately, and the client watches the project from day one. Pushing is resumable: if it fails midway, already-pushed drafts are not duplicated.
 
 **View as (impersonation).** "View as" starts a client session for that company *alongside* your admin session, so you land on their exact dashboard. An amber banner at the top shows you're impersonating and offers **Return to admin**, which clears only the client session. The client-facing login (`/login`) and the admin login (`/admin/login`) link to each other, so it's one click to switch between signing in as a client or as an xSingularity team member.
 

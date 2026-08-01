@@ -189,3 +189,214 @@ export async function deleteProject(formData: FormData) {
   revalidatePath("/admin");
   done(`/admin/companies/${project.companyId}`, `Project "${project.name}" was deleted.`);
 }
+
+/* ─────────────────────────── Project intake ───────────────────────────
+ * Package sold on the site → kick-off call on Zoom → this flow:
+ * approve (create GitLab repo) → upload recording → transcribe (Groq Whisper)
+ * → AI-draft issues → developer review → push confirmed issues to GitLab.
+ */
+
+import { MAX_AUDIO_BYTES, draftIssuesFromTranscript, transcribe } from "@/lib/groq";
+import { adminToken, createIssue, createRepo } from "@/lib/gitlab-admin";
+
+/** Approval step: creates the GitLab repo and the Project row in one go. */
+export async function createProjectWithRepo(formData: FormData) {
+  await requireAdmin();
+  const companyId = Number(formData.get("companyId"));
+  const path = `/admin/companies/${companyId}`;
+  const name = text(formData, "name");
+  const pkg = text(formData, "package");
+  if (!companyId) back("/admin", "Missing company id.");
+  if (!name) back(path, "Project name is required.");
+
+  let repo;
+  let token;
+  try {
+    token = adminToken();
+    repo = await createRepo(name);
+  } catch (err) {
+    console.error("createProjectWithRepo:", err);
+    back(path, err instanceof Error ? err.message : "Could not create the GitLab repository.");
+  }
+  const project = await prisma.project.create({
+    data: {
+      companyId,
+      name,
+      provider: "gitlab",
+      repo: repo.pathWithNamespace,
+      token,
+      package: pkg || null,
+    },
+  });
+  revalidatePath("/admin");
+  done(`/admin/projects/${project.id}`, `GitLab repo "${repo.pathWithNamespace}" created.`);
+}
+
+/* Meeting recordings arrive in ~3MB chunks because serverless request bodies
+ * are capped well below a full recording. Chunks live in Postgres only until
+ * transcription succeeds. */
+
+export async function createMeeting(projectId: number, filename: string): Promise<number> {
+  await requireAdmin();
+  const meeting = await prisma.meeting.create({
+    data: { projectId, filename: filename.slice(0, 255) || "recording" },
+  });
+  return meeting.id;
+}
+
+export async function uploadMeetingChunk(meetingId: number, seq: number, formData: FormData) {
+  await requireAdmin();
+  const blob = formData.get("chunk");
+  if (!(blob instanceof Blob)) throw new Error("Missing chunk.");
+  const data = Buffer.from(await blob.arrayBuffer());
+  await prisma.meetingChunk.create({ data: { meetingId, seq, data } });
+}
+
+/** Reassembles the chunks, transcribes with Groq Whisper, drops the audio. */
+export async function finalizeMeeting(meetingId: number): Promise<void> {
+  await requireAdmin();
+  const meeting = await prisma.meeting.findUniqueOrThrow({ where: { id: meetingId } });
+  const chunks = await prisma.meetingChunk.findMany({
+    where: { meetingId },
+    orderBy: { seq: "asc" },
+  });
+  const audio = Buffer.concat(chunks.map((c) => Buffer.from(c.data)));
+  if (audio.byteLength > MAX_AUDIO_BYTES) {
+    await prisma.meeting.delete({ where: { id: meetingId } });
+    throw new Error(
+      "Recording is over 25MB (Groq's limit). Upload Zoom's audio-only .m4a instead of the video.",
+    );
+  }
+  try {
+    const transcript = await transcribe(audio, meeting.filename);
+    await prisma.meeting.update({
+      where: { id: meetingId },
+      data: { transcript, status: "transcribed" },
+    });
+  } finally {
+    // Success or failure, never keep audio around.
+    await prisma.meetingChunk.deleteMany({ where: { meetingId } });
+  }
+  revalidatePath(`/admin/projects/${meeting.projectId}`);
+}
+
+export async function deleteMeeting(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  if (!id) back("/admin", "Missing meeting id.");
+  const meeting = await prisma.meeting.delete({ where: { id } });
+  done(`/admin/projects/${meeting.projectId}`, "Meeting deleted.");
+}
+
+/** Turns the transcript into draft issues for developer review. */
+export async function analyzeMeeting(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  const path = `/admin/meetings/${id}`;
+  const meeting = await prisma.meeting.findUnique({
+    where: { id },
+    include: { project: true },
+  });
+  if (!meeting?.transcript) back(path, "This meeting has no transcript yet.");
+
+  let drafted;
+  try {
+    drafted = await draftIssuesFromTranscript(meeting.transcript, {
+      projectName: meeting.project.name,
+      package: meeting.project.package,
+    });
+  } catch (err) {
+    console.error("analyzeMeeting:", err);
+    back(path, err instanceof Error ? err.message : "Analysis failed.");
+  }
+  await prisma.draftIssue.createMany({
+    data: drafted.map((d) => ({
+      meetingId: meeting.id,
+      requirement: d.requirement,
+      title: d.title,
+      description: d.description,
+      estimateMinutes: Math.round(d.estimateHours * 60),
+    })),
+  });
+  await prisma.meeting.update({ where: { id }, data: { status: "analyzed" } });
+  done(path, `${drafted.length} draft issue${drafted.length === 1 ? "" : "s"} generated — review below.`);
+}
+
+export async function updateDraftIssue(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  const draft = await prisma.draftIssue.findUnique({ where: { id }, include: { meeting: true } });
+  if (!draft) back("/admin", "Draft no longer exists.");
+  const path = `/admin/meetings/${draft.meetingId}`;
+  const title = text(formData, "title");
+  const description = String(formData.get("description") ?? "").trim();
+  const hours = Number(formData.get("estimateHours"));
+  if (!title || !description) back(path, "Title and description are required.");
+  await prisma.draftIssue.update({
+    where: { id },
+    data: {
+      title,
+      description,
+      requirement: text(formData, "requirement") || draft.requirement,
+      estimateMinutes: hours > 0 ? Math.round(hours * 60) : null,
+    },
+  });
+  done(path, "Draft updated.");
+}
+
+export async function deleteDraftIssue(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  const draft = await prisma.draftIssue.delete({ where: { id } });
+  done(`/admin/meetings/${draft.meetingId}`, "Draft discarded.");
+}
+
+export async function addDraftIssue(formData: FormData) {
+  await requireAdmin();
+  const meetingId = Number(formData.get("meetingId"));
+  const path = `/admin/meetings/${meetingId}`;
+  const title = text(formData, "title");
+  if (!title) back(path, "Title is required.");
+  await prisma.draftIssue.create({
+    data: {
+      meetingId,
+      title,
+      description: String(formData.get("description") ?? "").trim() || title,
+      requirement: text(formData, "requirement") || "Added by developer",
+    },
+  });
+  done(path, "Draft added.");
+}
+
+/** The confirm step: every remaining draft becomes a real GitLab issue. */
+export async function pushDraftIssues(formData: FormData) {
+  await requireAdmin();
+  const meetingId = Number(formData.get("meetingId"));
+  const path = `/admin/meetings/${meetingId}`;
+  const meeting = await prisma.meeting.findUnique({
+    where: { id: meetingId },
+    include: { project: true, draftIssues: { where: { status: "draft" }, orderBy: { id: "asc" } } },
+  });
+  if (!meeting) back("/admin", "Meeting no longer exists.");
+  if (meeting.project.provider !== "gitlab") back(path, "Pushing issues requires a GitLab project.");
+  if (meeting.draftIssues.length === 0) back(path, "No drafts left to push.");
+
+  let pushed = 0;
+  for (const draft of meeting.draftIssues) {
+    try {
+      const iid = await createIssue(meeting.project.repo, draft);
+      await prisma.draftIssue.update({
+        where: { id: draft.id },
+        data: { status: "pushed", gitlabIid: iid },
+      });
+      pushed++;
+    } catch (err) {
+      // Stop at the first failure; already-pushed drafts stay marked, so
+      // re-running the action continues where it left off without duplicates.
+      console.error(`pushDraftIssues draft ${draft.id}:`, err);
+      back(path, `Pushed ${pushed} issue(s), then failed: ${err instanceof Error ? err.message : err}`);
+    }
+  }
+  revalidatePath(`/admin/projects/${meeting.projectId}`);
+  done(path, `${pushed} issue${pushed === 1 ? "" : "s"} created in GitLab.`);
+}

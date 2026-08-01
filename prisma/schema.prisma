@@ -29,5 +29,52 @@ model Project {
   baseUrl   String?
   /// Read-only access token for the repo's issues.
   token     String
-  createdAt DateTime @default(now())
+  /// Package sold ("Página web", "Bot de atención", ...) — context for issue drafting.
+  package   String?
+  createdAt DateTime  @default(now())
+  meetings  Meeting[]
+}
+
+/// A recorded client call: audio arrives in chunks (serverless body limits),
+/// is transcribed with Groq Whisper, then analyzed into draft issues.
+model Meeting {
+  id          Int            @id @default(autoincrement())
+  projectId   Int
+  project     Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  filename    String
+  /// "uploading" | "transcribed" | "analyzed"
+  status      String         @default("uploading")
+  transcript  String?
+  createdAt   DateTime       @default(now())
+  chunks      MeetingChunk[]
+  draftIssues DraftIssue[]
+}
+
+/// Temporary audio storage between chunked upload and transcription; rows are
+/// deleted as soon as the transcript is stored.
+model MeetingChunk {
+  id        Int     @id @default(autoincrement())
+  meetingId Int
+  meeting   Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  seq       Int
+  data      Bytes
+
+  @@unique([meetingId, seq])
+}
+
+/// AI-drafted issue awaiting developer review. Only confirmed ("push") drafts
+/// reach GitLab; `gitlabIid` records where it landed.
+model DraftIssue {
+  id              Int      @id @default(autoincrement())
+  meetingId       Int
+  meeting         Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  /// Client requirement (verbatim-ish from the transcript) this issue serves.
+  requirement     String
+  title           String
+  description     String
+  estimateMinutes Int?
+  /// "draft" | "pushed"
+  status          String   @default("draft")
+  gitlabIid       Int?
+  createdAt       DateTime @default(now())
 }
