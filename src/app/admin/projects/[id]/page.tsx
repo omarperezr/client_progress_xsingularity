@@ -17,7 +17,7 @@ import {
   SubmitButton,
 } from "@/components/AdminForm";
 import { MeetingUpload } from "@/components/MeetingUpload";
-import { deleteProject, updateProject } from "../../actions";
+import { createMeetingFromTranscript, deleteProject, updateProject } from "../../actions";
 
 export const dynamic = "force-dynamic";
 // Uploading a meeting ends with a Groq Whisper call; allow more than the default runtime.
@@ -179,6 +179,25 @@ export default async function AdminProjectPage({
               description="Upload the kick-off recording; Whisper transcribes it and the AI drafts issues for review."
             >
               <MeetingUpload projectId={project.id} />
+              <details className="mt-4">
+                <summary className="cursor-pointer text-sm text-zinc-400 hover:text-zinc-200">
+                  Or paste a transcript instead
+                </summary>
+                <form action={createMeetingFromTranscript} className="mt-3 space-y-3">
+                  <input type="hidden" name="projectId" value={project.id} />
+                  <Field label="Title" name="title" placeholder="Kick-off call notes" />
+                  <label className="block text-sm text-zinc-400">
+                    Transcript
+                    <textarea
+                      name="transcript"
+                      rows={6}
+                      required
+                      className="mt-1 block w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200"
+                    />
+                  </label>
+                  <SubmitButton>Save transcript</SubmitButton>
+                </form>
+              </details>
               {project.meetings.length > 0 && (
                 <ul className="mt-4 space-y-2">
                   {project.meetings.map((m) => (

@@ -400,3 +400,22 @@ export async function pushDraftIssues(formData: FormData) {
   revalidatePath(`/admin/projects/${meeting.projectId}`);
   done(path, `${pushed} issue${pushed === 1 ? "" : "s"} created in GitLab.`);
 }
+
+/** Manual path: paste a transcript (unrecorded call, notes) instead of audio. */
+export async function createMeetingFromTranscript(formData: FormData) {
+  await requireAdmin();
+  const projectId = Number(formData.get("projectId"));
+  const path = `/admin/projects/${projectId}`;
+  const transcript = String(formData.get("transcript") ?? "").trim();
+  if (!projectId) back("/admin", "Missing project id.");
+  if (transcript.length < 50) back(path, "Transcript is too short to analyze.");
+  const meeting = await prisma.meeting.create({
+    data: {
+      projectId,
+      filename: text(formData, "title") || "Pasted transcript",
+      transcript,
+      status: "transcribed",
+    },
+  });
+  done(`/admin/meetings/${meeting.id}`, "Transcript saved — generate draft issues below.");
+}
