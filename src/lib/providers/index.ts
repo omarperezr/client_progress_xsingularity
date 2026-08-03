@@ -1,4 +1,4 @@
-import { revalidateTag, unstable_cache } from "next/cache";
+import { unstable_cache, updateTag } from "next/cache";
 import * as github from "./github";
 import * as gitlab from "./gitlab";
 import type { NormalizedComment, NormalizedIssue, ProviderProject } from "./types";
@@ -24,7 +24,7 @@ function pick(provider: string) {
  * of hitting the API on every request. A client posting a comment revalidates
  * the affected project (see `revalidateProject`).
  */
-const CACHE_TTL_SECONDS = 60;
+const CACHE_TTL_SECONDS = 30;
 
 /** A project identified well enough (by id) to key its cache entries. */
 export type CacheableProject = ProviderProject & { id: number };
@@ -38,13 +38,13 @@ export function commentsTag(projectId: number) {
 }
 
 /**
- * Marks a project's cached issues + comments stale, e.g. after a client
- * comments. Uses stale-while-revalidate ("max") so the next view refreshes in
- * the background rather than blocking.
+ * Drops a project's cached issues + comments, e.g. after a client comments or
+ * hits "Refresh". Uses `updateTag` (Server Actions only) so the next render
+ * blocks on a fresh fetch instead of serving one more stale copy.
  */
 export function revalidateProject(projectId: number) {
-  revalidateTag(issuesTag(projectId), "max");
-  revalidateTag(commentsTag(projectId), "max");
+  updateTag(issuesTag(projectId));
+  updateTag(commentsTag(projectId));
 }
 
 export function fetchIssues(

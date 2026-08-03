@@ -22,6 +22,12 @@ async function ownedProject(projectId: number) {
   return project ? { company, project } : null;
 }
 
+/** "Refresh" button: drops the cached issues so this render refetches them. */
+export async function refreshProject(projectId: number): Promise<void> {
+  if (!(await ownedProject(projectId))) return;
+  revalidateProject(projectId);
+}
+
 export async function loadComments(
   projectId: number,
   issueId: number,

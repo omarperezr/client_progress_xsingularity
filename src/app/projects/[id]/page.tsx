@@ -12,6 +12,8 @@ import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Burnup, VelocityChart, StatusBar, BreakdownList } from "@/components/Charts";
 import { IssueRow, type IssueRowData } from "@/components/IssueRow";
+import { PendingButton } from "@/components/PendingButton";
+import { refreshProject } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +52,15 @@ export default async function ProjectPage({
           <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs uppercase tracking-wide text-zinc-400">
             {project.provider}
           </span>
+          <form action={refreshProject.bind(null, projectId)} className="ml-auto">
+            <PendingButton
+              pendingText="Refreshing…"
+              title={`Fetch the latest tasks from ${project.provider}`}
+              className="rounded-md border border-zinc-800 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-900"
+            >
+              Refresh
+            </PendingButton>
+          </form>
         </div>
 
         {!issues ? (
