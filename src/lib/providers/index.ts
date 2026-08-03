@@ -47,6 +47,20 @@ export function revalidateProject(projectId: number) {
   updateTag(commentsTag(projectId));
 }
 
+/**
+ * Uncached read, for the pages that show one project in detail. The cache below
+ * is stale-while-revalidate, so a cached page always renders the *previous*
+ * load's issues — an issue closed on the provider stayed "In progress" until
+ * someone reloaded twice. List views keep the cache: they fan out over every
+ * project at once, so one API call per project per load matters there.
+ */
+export function fetchIssuesLive(
+  provider: string,
+  project: ProviderProject,
+): Promise<NormalizedIssue[]> {
+  return pick(provider).fetchIssues(project);
+}
+
 export function fetchIssues(
   provider: string,
   project: CacheableProject,

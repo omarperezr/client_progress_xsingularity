@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin-auth";
-import { fetchIssues, computeProgress } from "@/lib/providers";
+import { fetchIssuesLive, computeProgress } from "@/lib/providers";
 import type { NormalizedIssue } from "@/lib/providers/types";
 import { formatMinutes } from "@/lib/estimate";
 import { AdminHeader } from "@/components/AdminHeader";
@@ -47,7 +47,7 @@ export default async function AdminProjectPage({
 
   let issues: NormalizedIssue[] | null = null;
   try {
-    issues = await fetchIssues(project.provider, project);
+    issues = await fetchIssuesLive(project.provider, project);
   } catch (err) {
     console.error(`Failed to fetch issues for project ${project.id}:`, err);
   }
