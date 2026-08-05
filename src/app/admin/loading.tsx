@@ -1,11 +1,13 @@
 import { Shimmer } from "@/components/Skeleton";
+import { Barcode } from "@/components/Manifest";
 
 function AdminHeaderSkeleton() {
   return (
-    <header className="border-b border-zinc-800 bg-zinc-900/60">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <span className="text-lg font-semibold tracking-tight text-white">
-          Admin <span className="text-zinc-500">· xSingularity</span>
+    <header className="border-b-2 border-cargo bg-sheet">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+        <span className="flex items-center gap-3 text-ink">
+          <Barcode className="h-5" />
+          <span className="label-caps text-lg leading-none">Dispatch</span>
         </span>
         <Shimmer className="h-8 w-28" />
       </div>
@@ -15,13 +17,15 @@ function AdminHeaderSkeleton() {
 
 export default function AdminLoading() {
   return (
-    <div className="min-h-screen w-full bg-zinc-950">
+    <div className="min-h-screen w-full">
       <AdminHeaderSkeleton />
       <main className="mx-auto w-full max-w-6xl px-4 py-8">
-        <Shimmer className="mb-4 h-6 w-32" />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <div className="mb-4 border-b-2 border-ink pb-2">
+          <Shimmer className="h-7 w-52" />
+        </div>
+        <div className="grid grid-cols-2 gap-px border border-ink bg-ink sm:grid-cols-5">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Shimmer key={i} className="h-16" />
+            <Shimmer key={i} className={`h-16 border-0 ${i === 4 ? "max-sm:col-span-2" : ""}`} />
           ))}
         </div>
 

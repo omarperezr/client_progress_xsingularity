@@ -1,15 +1,14 @@
 import { PendingButton } from "./PendingButton";
 
-const INPUT =
-  "w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500";
-
 /** Success / error banner driven by the ?ok= and ?error= query params. */
 export function Banner({ ok, error }: { ok?: string; error?: string }) {
   if (!ok && !error) return null;
   return (
     <p
-      className={`mb-6 rounded-md px-4 py-3 text-sm ${
-        error ? "bg-red-500/10 text-red-400" : "bg-emerald-500/10 text-emerald-400"
+      className={`mb-6 border px-4 py-3 text-sm font-medium ${
+        error
+          ? "border-exception bg-exception/5 text-exception"
+          : "border-delivered bg-delivered/5 text-delivered"
       }`}
     >
       {error ?? ok}
@@ -36,7 +35,7 @@ export function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-zinc-300">{label}</span>
+      <span className="label-caps mb-1 block text-[11px] text-ink-soft">{label}</span>
       <input
         name={name}
         type={type}
@@ -44,9 +43,9 @@ export function Field({
         required={required}
         placeholder={placeholder}
         autoComplete="off"
-        className={INPUT}
+        className="input"
       />
-      {hint && <span className="mt-1 block text-xs text-zinc-500">{hint}</span>}
+      {hint && <span className="mt-1 block text-xs text-ink-soft">{hint}</span>}
     </label>
   );
 }
@@ -64,8 +63,8 @@ export function SelectField({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-zinc-300">{label}</span>
-      <select name={name} defaultValue={defaultValue} className={INPUT}>
+      <span className="label-caps mb-1 block text-[11px] text-ink-soft">{label}</span>
+      <select name={name} defaultValue={defaultValue} className="input">
         {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
@@ -84,10 +83,7 @@ export function SubmitButton({
   pendingText?: string;
 }) {
   return (
-    <PendingButton
-      pendingText={pendingText}
-      className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
-    >
+    <PendingButton pendingText={pendingText} className="btn btn-primary px-4 py-2 text-xs">
       {children}
     </PendingButton>
   );
@@ -107,9 +103,9 @@ export function DangerZone({
   children: React.ReactNode;
 }) {
   return (
-    <details className="rounded-xl border border-red-900/60 bg-red-500/5 p-5">
-      <summary className="cursor-pointer text-sm font-medium text-red-400">{summary}</summary>
-      <p className="mt-3 text-sm text-zinc-400">{warning}</p>
+    <details className="border border-exception bg-sheet p-5">
+      <summary className="label-caps cursor-pointer text-xs text-exception">{summary}</summary>
+      <p className="mt-3 text-sm text-ink-soft">{warning}</p>
       <div className="mt-3">{children}</div>
     </details>
   );
@@ -117,10 +113,7 @@ export function DangerZone({
 
 export function DangerButton({ children }: { children: React.ReactNode }) {
   return (
-    <PendingButton
-      pendingText="Deleting…"
-      className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-500"
-    >
+    <PendingButton pendingText="Deleting…" className="btn btn-void px-4 py-2 text-xs">
       {children}
     </PendingButton>
   );
@@ -136,19 +129,27 @@ export function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-      <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-400">{title}</h2>
-      {description && <p className="mt-1 text-sm text-zinc-500">{description}</p>}
+    <section className="sheet p-5">
+      <h2 className="label-caps border-b border-rule pb-2 text-xs text-ink">{title}</h2>
+      {description && <p className="mt-2 text-sm text-ink-soft">{description}</p>}
       <div className="mt-4">{children}</div>
     </section>
   );
 }
 
-export function Stat({ label, value }: { label: string; value: string }) {
+export function Stat({
+  label,
+  value,
+  className = "",
+}: {
+  label: string;
+  value: string;
+  className?: string;
+}) {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-      <dt className="text-xs uppercase tracking-wide text-zinc-500">{label}</dt>
-      <dd className="mt-1 text-xl font-semibold text-white">{value}</dd>
+    <div className={`bg-sheet px-3 py-2.5 ${className}`}>
+      <dt className="label-caps text-[10px] text-ink-soft">{label}</dt>
+      <dd className="mt-0.5 font-mono text-lg font-semibold leading-tight text-ink">{value}</dd>
     </div>
   );
 }

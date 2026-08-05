@@ -44,20 +44,20 @@ export default async function MeetingPage({
   const pushed = meeting.draftIssues.filter((d) => d.status === "pushed");
 
   return (
-    <div className="min-h-screen w-full bg-zinc-950">
+    <div className="min-h-screen w-full">
       <AdminHeader admin={admin} />
       <main className="mx-auto w-full max-w-4xl px-4 py-8">
         <Link
           href={`/admin/projects/${meeting.projectId}`}
-          className="text-sm text-zinc-400 hover:text-zinc-200"
+          className="label-caps text-xs text-ink-soft transition-colors hover:text-ink"
         >
           ← {meeting.project.name}
         </Link>
-        <div className="mt-3 mb-6 flex items-center gap-3">
-          <h1 className="text-xl font-semibold text-white">{meeting.filename}</h1>
-          <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs uppercase tracking-wide text-zinc-400">
-            {meeting.status}
-          </span>
+        <div className="mt-3 mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-b-2 border-ink pb-3">
+          <h1 className="min-w-0 truncate text-2xl font-semibold leading-tight text-ink">
+            {meeting.filename}
+          </h1>
+          <span className="stamp text-[10px] text-transit">{meeting.status}</span>
         </div>
         <Banner ok={ok} error={error} />
 
@@ -65,15 +65,15 @@ export default async function MeetingPage({
           <Card title="Transcript" description="Produced by Whisper from the uploaded recording.">
             {meeting.transcript ? (
               <details>
-                <summary className="cursor-pointer text-sm text-zinc-400 hover:text-zinc-200">
+                <summary className="cursor-pointer text-sm font-medium text-ink-soft transition-colors hover:text-ink">
                   Show full transcript ({meeting.transcript.length.toLocaleString()} chars)
                 </summary>
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-zinc-300">
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-ink">
                   {meeting.transcript}
                 </p>
               </details>
             ) : (
-              <p className="text-sm text-zinc-500">Still uploading or transcription failed.</p>
+              <p className="text-sm text-ink-soft">Still uploading or transcription failed.</p>
             )}
           </Card>
 
@@ -91,13 +91,10 @@ export default async function MeetingPage({
 
               <div className="space-y-4">
                 {drafts.map((draft) => (
-                  <details
-                    key={draft.id}
-                    className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4"
-                  >
-                    <summary className="cursor-pointer text-sm font-medium text-zinc-200">
+                  <details key={draft.id} className="border border-rule bg-sheet-dim/60 p-4">
+                    <summary className="cursor-pointer text-sm font-medium text-ink">
                       {draft.title}
-                      <span className="ml-2 text-xs text-zinc-500">
+                      <span className="ml-2 font-mono text-xs font-normal text-ink-soft">
                         {draft.estimateMinutes ? `${(draft.estimateMinutes / 60).toFixed(1)}h · ` : ""}
                         {draft.requirement}
                       </span>
@@ -110,14 +107,16 @@ export default async function MeetingPage({
                         name="requirement"
                         defaultValue={draft.requirement}
                       />
-                      <label className="block text-sm text-zinc-400">
-                        Description (Markdown)
+                      <label className="block">
+                        <span className="label-caps mb-1 block text-[11px] text-ink-soft">
+                          Description (Markdown)
+                        </span>
                         <textarea
                           name="description"
                           defaultValue={draft.description}
                           rows={8}
                           required
-                          className="mt-1 block w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200"
+                          className="input font-mono text-xs"
                         />
                       </label>
                       <Field
@@ -136,7 +135,7 @@ export default async function MeetingPage({
                       <input type="hidden" name="id" value={draft.id} />
                       <PendingButton
                         pendingText="Discarding…"
-                        className="text-sm text-red-400 hover:text-red-300"
+                        className="text-sm font-medium text-exception hover:underline"
                       >
                         Discard draft
                       </PendingButton>
@@ -144,7 +143,7 @@ export default async function MeetingPage({
                   </details>
                 ))}
                 {drafts.length === 0 && (
-                  <p className="text-sm text-zinc-500">
+                  <p className="text-sm text-ink-soft">
                     No drafts pending{pushed.length ? " — everything was pushed." : "."}
                   </p>
                 )}
@@ -160,10 +159,11 @@ export default async function MeetingPage({
               )}
 
               {pushed.length > 0 && (
-                <ul className="mt-6 space-y-1 text-sm text-zinc-500">
+                <ul className="mt-6 space-y-1.5 text-sm text-ink-soft">
                   {pushed.map((d) => (
-                    <li key={d.id}>
-                      ✓ #{d.gitlabIid} {d.title}
+                    <li key={d.id} className="flex items-center gap-2">
+                      <span className="stamp text-[10px] text-delivered">Pushed</span>
+                      <span className="font-mono text-xs">#{d.gitlabIid}</span> {d.title}
                     </li>
                   ))}
                 </ul>
@@ -176,13 +176,11 @@ export default async function MeetingPage({
               <form action={addDraftIssue} className="space-y-3">
                 <input type="hidden" name="meetingId" value={meeting.id} />
                 <Field label="Title" name="title" required />
-                <label className="block text-sm text-zinc-400">
-                  Description (Markdown)
-                  <textarea
-                    name="description"
-                    rows={4}
-                    className="mt-1 block w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200"
-                  />
+                <label className="block">
+                  <span className="label-caps mb-1 block text-[11px] text-ink-soft">
+                    Description (Markdown)
+                  </span>
+                  <textarea name="description" rows={4} className="input font-mono text-xs" />
                 </label>
                 <SubmitButton>Add draft</SubmitButton>
               </form>

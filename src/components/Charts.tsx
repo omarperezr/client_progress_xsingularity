@@ -1,11 +1,14 @@
 import type { BurnupPoint, Breakdown, Forecast, WeekBucket } from "@/lib/analytics";
 import { formatMinutes } from "@/lib/estimate";
 
-// Dark-surface palette, kept in step with the app's Tailwind zinc/emerald/amber theme.
-const DONE = "#10b981"; // emerald-500
-const GRID = "#27272a"; // zinc-800
-const AXIS = "#3f3f46"; // zinc-700
-const MUTED = "#71717a"; // zinc-500
+// Night-dispatch palette, kept in step with the tokens in globals.css.
+const INK = "#ece8dd";
+const DONE = "#55b183"; // delivered green
+const TRANSIT = "#6f9fd8"; // in transit
+const CARGO = "#f0561a"; // international orange (projection / forecast marks)
+const GRID = "#34312a"; // subtle rules
+const AXIS = "#56514a"; // mid rules
+const MUTED = "#b3ac9c"; // secondary ink
 
 /**
  * Burnup: cumulative % complete per week, plus a dashed projection to 100% at the
@@ -13,11 +16,11 @@ const MUTED = "#71717a"; // zinc-500
  */
 export function Burnup({ burnup, forecast }: { burnup: BurnupPoint[]; forecast: Forecast }) {
   const W = 720;
-  const H = 220;
-  const L = 34;
+  const H = 224;
+  const L = 46;
   const R = 706;
-  const T = 12;
-  const B = 184;
+  const T = 14;
+  const B = 186;
   const useTime = burnup.some((p) => p.percentByTime !== null);
   const value = (p: BurnupPoint) => (useTime ? (p.percentByTime ?? 0) : p.percentByIssues);
 
@@ -36,21 +39,31 @@ export function Burnup({ burnup, forecast }: { burnup: BurnupPoint[]; forecast: 
   const last = pts[pts.length - 1];
   const projEnd = projWeeks > 0 ? { px: x(lastIdx + projWeeks), py: y(100) } : null;
 
-  const every = Math.max(1, Math.ceil(burnup.length / 6));
+  // Thin x labels by rendered spacing, not point count: a projection-heavy
+  // domain squeezes the data points left, so labels need ~64 viewBox units each.
+  const pxPerIdx = (R - L) / domainMax;
+  const every = Math.max(1, Math.ceil(64 / pxPerIdx));
+  const labelIdx = new Set(pts.map((_, i) => i).filter((i) => i % every === 0));
+  if (!labelIdx.has(lastIdx) && (lastIdx % every) * pxPerIdx >= 64) labelIdx.add(lastIdx);
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Progress over time">
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      className="w-full font-mono"
+      role="img"
+      aria-label="Progress over time"
+    >
       {[0, 25, 50, 75, 100].map((g) => (
         <g key={g}>
           <line x1={L} x2={R} y1={y(g)} y2={y(g)} stroke={GRID} strokeWidth={1} />
-          <text x={L - 6} y={y(g) + 3} textAnchor="end" fontSize={9} fill={MUTED}>
+          <text x={L - 7} y={y(g) + 4} textAnchor="end" fontSize={12} fill={MUTED}>
             {g}%
           </text>
         </g>
       ))}
 
-      <path d={area} fill={DONE} fillOpacity={0.12} />
-      <path d={line} fill="none" stroke={DONE} strokeWidth={2} strokeLinejoin="round" />
+      <path d={area} fill={DONE} fillOpacity={0.1} />
+      <path d={line} fill="none" stroke={INK} strokeWidth={2} strokeLinejoin="round" />
 
       {projEnd && (
         <>
@@ -59,27 +72,29 @@ export function Burnup({ burnup, forecast }: { burnup: BurnupPoint[]; forecast: 
             y1={last.py}
             x2={projEnd.px}
             y2={projEnd.py}
-            stroke={DONE}
+            stroke={CARGO}
             strokeWidth={2}
-            strokeDasharray="4 4"
-            strokeOpacity={0.6}
+            strokeDasharray="5 4"
           />
-          <circle cx={projEnd.px} cy={projEnd.py} r={3.5} fill={DONE} fillOpacity={0.6} />
-          <text x={projEnd.px} y={projEnd.py - 7} textAnchor="end" fontSize={9} fill={MUTED}>
-            forecast
+          <path
+            d={`M${projEnd.px},${projEnd.py - 4} l4,4 l-4,4 l-4,-4 Z`}
+            fill={CARGO}
+          />
+          <text x={projEnd.px - 10} y={projEnd.py + 4} textAnchor="end" fontSize={12} fill={CARGO}>
+            ETA
           </text>
         </>
       )}
 
       {pts.map((p, i) => (
-        <circle key={i} cx={p.px} cy={p.py} r={i === lastIdx ? 3.5 : 2} fill={DONE}>
+        <circle key={i} cx={p.px} cy={p.py} r={i === lastIdx ? 3.5 : 2} fill={INK}>
           <title>{`${p.label}: ${p.pct}% complete`}</title>
         </circle>
       ))}
 
       {pts.map((p, i) =>
-        i % every === 0 || i === lastIdx ? (
-          <text key={`l${i}`} x={p.px} y={B + 14} textAnchor="middle" fontSize={9} fill={MUTED}>
+        labelIdx.has(i) ? (
+          <text key={`l${i}`} x={p.px} y={B + 18} textAnchor="middle" fontSize={12} fill={MUTED}>
             {p.label}
           </text>
         ) : null,
@@ -92,17 +107,22 @@ export function Burnup({ burnup, forecast }: { burnup: BurnupPoint[]; forecast: 
 export function VelocityChart({ weeks }: { weeks: WeekBucket[] }) {
   const data = weeks.slice(-12);
   const W = 720;
-  const H = 180;
+  const H = 184;
   const L = 24;
   const R = 712;
   const T = 10;
-  const B = 150;
+  const B = 152;
   const max = Math.max(1, ...data.map((w) => w.closedIssues));
   const slot = (R - L) / data.length;
   const barW = Math.min(34, slot - 6);
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Tasks completed per week">
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      className="w-full font-mono"
+      role="img"
+      aria-label="Tasks completed per week"
+    >
       <line x1={L} x2={R} y1={B} y2={B} stroke={AXIS} strokeWidth={1} />
       {data.map((w, i) => {
         const h = (w.closedIssues / max) * (B - T);
@@ -114,9 +134,7 @@ export function VelocityChart({ weeks }: { weeks: WeekBucket[] }) {
               y={B - h}
               width={barW}
               height={Math.max(h, w.closedIssues > 0 ? 2 : 0)}
-              rx={4}
-              fill={DONE}
-              fillOpacity={0.85}
+              fill={TRANSIT}
             >
               <title>
                 {`Week of ${w.label}: ${w.closedIssues} task${w.closedIssues === 1 ? "" : "s"}${
@@ -125,11 +143,11 @@ export function VelocityChart({ weeks }: { weeks: WeekBucket[] }) {
               </title>
             </rect>
             {w.closedIssues > 0 && (
-              <text x={cx} y={B - h - 4} textAnchor="middle" fontSize={9} fill={MUTED}>
+              <text x={cx} y={B - h - 5} textAnchor="middle" fontSize={12} fill={MUTED}>
                 {w.closedIssues}
               </text>
             )}
-            <text x={cx} y={B + 14} textAnchor="middle" fontSize={9} fill={MUTED}>
+            <text x={cx} y={B + 17} textAnchor="middle" fontSize={12} fill={MUTED}>
               {w.label}
             </text>
           </g>
@@ -148,35 +166,31 @@ export function StatusBar({
   const total = status.done + status.inProgress + status.notStarted;
   const segs = [
     { key: "Done", n: status.done, color: DONE },
-    { key: "In progress", n: status.inProgress, color: "#f59e0b" },
-    { key: "Not started", n: status.notStarted, color: "#52525b" },
-  ].filter((s) => s.n > 0);
+    { key: "In progress", n: status.inProgress, color: TRANSIT },
+    { key: "Not started", n: status.notStarted, color: "#7d776a" },
+  ];
 
   return (
     <div>
-      <div className="flex h-3 w-full gap-0.5 overflow-hidden rounded-full">
-        {total === 0 ? (
-          <div className="h-full w-full bg-zinc-800" />
-        ) : (
-          segs.map((s) => (
-            <div
-              key={s.key}
-              title={`${s.key}: ${s.n}`}
-              style={{ width: `${(s.n / total) * 100}%`, backgroundColor: s.color }}
-              className="h-full first:rounded-l-full last:rounded-r-full"
-            />
-          ))
-        )}
+      <div className="flex h-3 w-full border border-ink bg-sheet-dim">
+        {total > 0 &&
+          segs
+            .filter((s) => s.n > 0)
+            .map((s) => (
+              <div
+                key={s.key}
+                title={`${s.key}: ${s.n}`}
+                style={{ width: `${(s.n / total) * 100}%`, backgroundColor: s.color }}
+                className="h-full"
+              />
+            ))}
       </div>
-      <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs">
-        {[
-          { key: "Done", n: status.done, color: DONE },
-          { key: "In progress", n: status.inProgress, color: "#f59e0b" },
-          { key: "Not started", n: status.notStarted, color: "#52525b" },
-        ].map((s) => (
-          <li key={s.key} className="flex items-center gap-1.5 text-zinc-400">
-            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
-            {s.key} <span className="font-medium text-zinc-200">{s.n}</span>
+      <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1">
+        {segs.map((s) => (
+          <li key={s.key} className="flex items-center gap-1.5 text-xs text-ink-soft">
+            <span className="size-2" style={{ backgroundColor: s.color }} />
+            {s.key}{" "}
+            <span className="font-mono font-semibold text-ink">{s.n}</span>
           </li>
         ))}
       </ul>
@@ -190,20 +204,17 @@ export function BreakdownList({ items }: { items: Breakdown[] }) {
     <ul className="space-y-3">
       {items.map((b) => (
         <li key={b.key}>
-          <div className="mb-1 flex items-center justify-between gap-3 text-sm">
-            <span className="truncate text-zinc-200" title={b.key}>
+          <div className="mb-1 flex items-baseline justify-between gap-3 text-sm">
+            <span className="truncate font-medium text-ink" title={b.key}>
               {b.key}
             </span>
-            <span className="shrink-0 text-xs text-zinc-500">
+            <span className="shrink-0 font-mono text-xs text-ink-soft">
               {b.doneIssues}/{b.totalIssues} ·{" "}
               {b.remainingMinutes ? `${formatMinutes(b.remainingMinutes)} left` : "done"}
             </span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-500"
-              style={{ width: `${b.percent}%` }}
-            />
+          <div className="h-2 w-full border border-rule-mid bg-sheet-dim">
+            <div className="h-full bg-ink" style={{ width: `${b.percent}%` }} />
           </div>
         </li>
       ))}

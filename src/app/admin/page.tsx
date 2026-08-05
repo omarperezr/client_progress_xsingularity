@@ -8,6 +8,7 @@ import { collectProjectMessages, sortByNewest, type ClientMessage } from "@/lib/
 import { formatMinutes } from "@/lib/estimate";
 import { AdminHeader } from "@/components/AdminHeader";
 import { ProgressBar } from "@/components/ProgressBar";
+import { FieldGrid, Stamp, consignmentNo } from "@/components/Manifest";
 import { Banner, Card, Field, Stat, SubmitButton } from "@/components/AdminForm";
 import { createCompany, impersonateCompany } from "./actions";
 
@@ -31,14 +32,14 @@ interface ProjectView {
 function forecastLabel(f: Forecast): string {
   switch (f.status) {
     case "complete":
-      return "Complete";
+      return "Delivered";
     case "projected":
-      return `Est. finish ${new Date(f.etaDate!).toLocaleDateString("en-US", {
+      return `Est. arrival ${new Date(f.etaDate!).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
       })}`;
     case "stalled":
-      return "Paused";
+      return "On hold";
     default:
       return "Getting started";
   }
@@ -125,21 +126,27 @@ export default async function AdminPage({
     .sort((a, b) => b.staleCount - a.staleCount);
 
   return (
-    <div className="min-h-screen w-full bg-zinc-950">
+    <div className="min-h-screen w-full">
       <AdminHeader admin={admin} />
       <main className="mx-auto w-full max-w-6xl px-4 py-8">
         <Banner ok={ok} error={error} />
 
-        <h1 className="mb-4 text-xl font-semibold text-white">Overview</h1>
-        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <div className="mb-4 border-b-2 border-ink pb-2">
+          <h1 className="label-caps text-2xl text-ink">Operations board</h1>
+        </div>
+        <FieldGrid className="grid-cols-2 sm:grid-cols-5">
           <Stat label="Clients" value={String(companies.length)} />
           <Stat label="Projects" value={String(projectCount)} />
           <Stat label="Tasks done" value={`${totals.closedIssues}/${totals.totalIssues}`} />
           <Stat label="Est. remaining" value={formatMinutes(totals.remainingMinutes) ?? "—"} />
-          <Stat label="Unanswered messages" value={String(unanswered.length)} />
-        </dl>
+          <Stat
+            label="Unanswered messages"
+            value={String(unanswered.length)}
+            className="max-sm:col-span-2"
+          />
+        </FieldGrid>
         {failing > 0 && (
-          <p className="mt-3 text-sm text-amber-400">
+          <p className="mt-3 border border-hold bg-hold/5 px-3 py-2 text-sm font-medium text-hold">
             {failing} project{failing === 1 ? "" : "s"} could not be loaded from their provider —
             check the repo and token.
           </p>
@@ -147,41 +154,44 @@ export default async function AdminPage({
 
         {/* Inbox + needs attention */}
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-400">
-                Unanswered client messages
-              </h2>
-              <Link href="/admin/inbox" className="text-xs text-indigo-400 hover:text-indigo-300">
-                Open inbox →
+          <section className="sheet p-5">
+            <div className="mb-4 flex items-baseline justify-between gap-2 border-b border-rule pb-2">
+              <h2 className="label-caps text-xs text-ink">Unanswered client messages</h2>
+              <Link
+                href="/admin/inbox"
+                className="label-caps text-[11px] text-transit hover:underline"
+              >
+                Open inbox
               </Link>
             </div>
             {unanswered.length === 0 ? (
-              <p className="text-sm text-zinc-500">Nothing waiting — all client comments have a reply. 👍</p>
+              <p className="text-sm text-ink-soft">
+                Nothing waiting — all client comments have a reply.
+              </p>
             ) : (
               <ul className="space-y-3">
                 {unanswered.slice(0, 4).map((m) => (
-                  <li key={`${m.projectId}-${m.issueId}`} className="rounded-lg border border-zinc-800 bg-zinc-950 p-3">
-                    <div className="mb-1 flex items-center justify-between gap-2 text-xs text-zinc-500">
-                      <span className="font-medium text-zinc-300">{m.companyName}</span>
+                  <li key={`${m.projectId}-${m.issueId}`} className="border border-rule bg-sheet-dim/60 p-3">
+                    <div className="mb-1 flex items-center justify-between gap-2 font-mono text-xs text-ink-soft">
+                      <span className="font-semibold text-ink">{m.companyName}</span>
                       <span>{ago(m.createdAt)}</span>
                     </div>
                     <a
                       href={m.issueUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block truncate text-sm text-zinc-200 hover:underline"
+                      className="block truncate text-sm font-medium text-ink hover:underline"
                       title={m.issueTitle}
                     >
                       {m.projectName}: {m.issueTitle}
                     </a>
-                    <p className="mt-1 line-clamp-2 text-sm text-zinc-400">{m.text}</p>
+                    <p className="mt-1 line-clamp-2 text-sm text-ink-soft">{m.text}</p>
                   </li>
                 ))}
                 {unanswered.length > 4 && (
-                  <li className="text-xs text-zinc-500">
+                  <li className="text-xs text-ink-soft">
                     +{unanswered.length - 4} more in the{" "}
-                    <Link href="/admin/inbox" className="text-indigo-400 hover:text-indigo-300">
+                    <Link href="/admin/inbox" className="font-medium text-transit hover:underline">
                       inbox
                     </Link>
                     .
@@ -191,22 +201,25 @@ export default async function AdminPage({
             )}
           </section>
 
-          <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-            <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-zinc-400">
-              Needs attention
+          <section className="sheet p-5">
+            <h2 className="label-caps mb-4 border-b border-rule pb-2 text-xs text-ink">
+              Exceptions — needs attention
             </h2>
             {needsAttention.length === 0 ? (
-              <p className="text-sm text-zinc-500">Every project has recent momentum. 👍</p>
+              <p className="text-sm text-ink-soft">Every project has recent momentum.</p>
             ) : (
               <ul className="space-y-2 text-sm">
                 {needsAttention.map((v) => (
                   <li key={v.id} className="flex items-center justify-between gap-3">
-                    <Link href={`/admin/projects/${v.id}`} className="min-w-0 flex-1 truncate text-zinc-200 hover:underline">
+                    <Link
+                      href={`/admin/projects/${v.id}`}
+                      className="min-w-0 flex-1 truncate font-medium text-ink hover:underline"
+                    >
                       {v.name}
                     </Link>
-                    <span className="shrink-0 text-xs text-amber-400">
-                      {v.forecast?.status === "stalled" ? "paused" : `${v.staleCount} stale`}
-                    </span>
+                    <Stamp tone="hold" className="shrink-0">
+                      {v.forecast?.status === "stalled" ? "On hold" : `${v.staleCount} stale`}
+                    </Stamp>
                   </li>
                 ))}
               </ul>
@@ -217,24 +230,22 @@ export default async function AdminPage({
         {/* Clients & projects + new client */}
         <div className="mt-8 grid gap-6 lg:grid-cols-[2fr_1fr]">
           <section>
-            <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-zinc-400">
-              Clients &amp; projects
-            </h2>
+            <h2 className="label-caps mb-3 text-sm text-ink">Clients &amp; projects</h2>
             {companies.length === 0 && (
-              <p className="text-sm text-zinc-400">No clients yet. Create the first one →</p>
+              <p className="text-sm text-ink-soft">No clients yet. Create the first one →</p>
             )}
-            <div className="space-y-4">
+            <div className="space-y-5">
               {companies.map((company) => (
-                <div key={company.id} className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-                  <div className="flex items-center justify-between gap-3">
+                <div key={company.id} className="sheet p-5">
+                  <div className="flex items-center justify-between gap-3 border-b border-rule pb-3">
                     <div className="min-w-0">
                       <Link
                         href={`/admin/companies/${company.id}`}
-                        className="font-medium text-white hover:underline"
+                        className="font-semibold text-ink hover:underline"
                       >
                         {company.name}
                       </Link>
-                      <p className="text-xs text-zinc-500">
+                      <p className="font-mono text-xs text-ink-soft">
                         @{company.username} · {company.projects.length} project
                         {company.projects.length === 1 ? "" : "s"}
                       </p>
@@ -243,16 +254,13 @@ export default async function AdminPage({
                       <form action={impersonateCompany}>
                         <input type="hidden" name="id" value={company.id} />
                         <PendingButton
-                          className="rounded-md border border-indigo-500/40 px-3 py-1.5 text-xs text-indigo-300 transition hover:bg-indigo-500/10"
+                          className="btn px-3 py-1.5 text-[11px]"
                           title="Open this client's own dashboard"
                         >
                           View as
                         </PendingButton>
                       </form>
-                      <Link
-                        href={`/admin/companies/${company.id}`}
-                        className="rounded-md border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 transition hover:bg-zinc-800"
-                      >
+                      <Link href={`/admin/companies/${company.id}`} className="btn px-3 py-1.5 text-[11px]">
                         Manage
                       </Link>
                     </div>
@@ -263,24 +271,24 @@ export default async function AdminPage({
                       {company.projects.map((project) => {
                         const v = views.get(project.id);
                         return (
-                          <li key={project.id} className="rounded-lg border border-zinc-800 bg-zinc-950 p-4">
+                          <li key={project.id} className="border border-rule bg-sheet-dim/60 p-4">
                             <div className="mb-2 flex items-center justify-between gap-3">
                               <Link
                                 href={`/admin/projects/${project.id}`}
-                                className="min-w-0 truncate text-sm text-zinc-200 hover:underline"
+                                className="min-w-0 truncate text-sm font-medium text-ink hover:underline"
                               >
+                                <span className="mr-2 font-mono text-xs font-normal text-ink-soft">
+                                  {consignmentNo(project.id)}
+                                </span>
                                 {project.name}
                               </Link>
                               <div className="flex shrink-0 items-center gap-2">
                                 {v && v.unansweredCount > 0 && (
-                                  <Link
-                                    href="/admin/inbox"
-                                    className="rounded-full bg-indigo-500/15 px-2 py-0.5 text-[10px] font-medium text-indigo-300"
-                                  >
-                                    {v.unansweredCount} unanswered
+                                  <Link href="/admin/inbox">
+                                    <Stamp tone="exception">{v.unansweredCount} unanswered</Stamp>
                                   </Link>
                                 )}
-                                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] uppercase tracking-wide text-zinc-400">
+                                <span className="hidden font-mono text-[10px] text-ink-soft sm:inline">
                                   {project.provider}:{project.repo}
                                 </span>
                               </div>
@@ -288,16 +296,18 @@ export default async function AdminPage({
                             {v?.progress ? (
                               <>
                                 <ProgressBar percent={v.progress.percentByIssues} />
-                                <p className="mt-2 flex flex-wrap gap-x-3 text-xs text-zinc-500">
+                                <p className="mt-2 flex flex-wrap gap-x-3 font-mono text-xs text-ink-soft">
                                   <span>
                                     {v.progress.closedIssues}/{v.progress.totalIssues} tasks
                                   </span>
                                   <span>{formatMinutes(v.progress.remainingMinutes) ?? "—"} remaining</span>
-                                  {v.forecast && <span className="text-zinc-400">{forecastLabel(v.forecast)}</span>}
+                                  {v.forecast && <span className="text-ink">{forecastLabel(v.forecast)}</span>}
                                 </p>
                               </>
                             ) : (
-                              <p className="text-xs text-red-400">Could not load issues from {project.provider}.</p>
+                              <p className="text-xs font-medium text-exception">
+                                Could not load issues from {project.provider}.
+                              </p>
                             )}
                           </li>
                         );
@@ -322,17 +332,17 @@ export default async function AdminPage({
             <Card title="Resources">
               <ul className="space-y-2 text-sm">
                 <li>
-                  <Link href="/admin/inbox" className="text-indigo-400 hover:text-indigo-300">
-                    Client message inbox →
+                  <Link href="/admin/inbox" className="font-medium text-transit hover:underline">
+                    Client message inbox
                   </Link>
                 </li>
                 <li>
-                  <Link href="/" className="text-indigo-400 hover:text-indigo-300">
-                    Open the client-facing view →
+                  <Link href="/" className="font-medium text-transit hover:underline">
+                    Open the client-facing view
                   </Link>
                 </li>
               </ul>
-              <p className="mt-3 text-xs text-zinc-500">
+              <p className="mt-3 text-xs text-ink-soft">
                 Use “View as” on any client to see their dashboard exactly as they do.
               </p>
             </Card>

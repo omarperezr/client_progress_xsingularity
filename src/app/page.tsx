@@ -7,7 +7,7 @@ import { computeAnalytics, type Forecast } from "@/lib/analytics";
 import { formatMinutes } from "@/lib/estimate";
 import { Header } from "@/components/Header";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
-import { ProgressBar } from "@/components/ProgressBar";
+import { RouteLine, FieldGrid, FieldBox, Stamp, consignmentNo, forecastStamp } from "@/components/Manifest";
 
 export const dynamic = "force-dynamic";
 
@@ -26,9 +26,9 @@ interface ProjectCard {
 function forecastLabel(f: Forecast): string {
   switch (f.status) {
     case "complete":
-      return "Complete";
+      return "All tasks delivered";
     case "projected":
-      return `Est. finish ${new Date(f.etaDate!).toLocaleDateString("en-US", {
+      return `Est. arrival ${new Date(f.etaDate!).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -38,6 +38,14 @@ function forecastLabel(f: Forecast): string {
     default:
       return "Getting started";
   }
+}
+
+/** Destination label for the route line. */
+function etaLabel(f: Forecast | null): string {
+  if (f?.status === "complete") return "Delivered";
+  if (f?.status === "projected")
+    return new Date(f.etaDate!).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return "ETA TBD";
 }
 
 export default async function DashboardPage() {
@@ -69,69 +77,66 @@ export default async function DashboardPage() {
   );
 
   return (
-    <div className="min-h-screen w-full bg-zinc-950">
+    <div className="min-h-screen w-full">
       <ImpersonationBanner companyName={company.name} />
       <Header companyName={company.name} />
       <main className="mx-auto w-full max-w-5xl px-4 py-8">
-        <h1 className="mb-6 text-xl font-semibold text-white">Your projects</h1>
-        {cards.length === 0 && (
-          <p className="text-sm text-zinc-400">
-            No projects yet. Your xSingularity contact will set them up shortly.
+        <div className="mb-6 flex flex-wrap items-baseline justify-between gap-2 border-b-2 border-ink pb-2">
+          <h1 className="label-caps text-2xl text-ink">Project manifest</h1>
+          <p className="font-mono text-xs text-ink-soft">
+            {cards.length} consignment{cards.length === 1 ? "" : "s"} on file
           </p>
+        </div>
+        {cards.length === 0 && (
+          <div className="sheet p-8 text-center">
+            <p className="text-sm text-ink-soft">
+              No projects on file yet. Your xSingularity contact will set them up shortly.
+            </p>
+          </div>
         )}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2">
           {cards.map((card) => (
             <Link
               key={card.id}
               href={`/projects/${card.id}`}
-              className="block rounded-xl border border-zinc-800 bg-zinc-900 p-5 transition hover:border-zinc-600"
+              className="sheet block p-5 transition-shadow hover:shadow-sheet-raised"
             >
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-medium text-white">{card.name}</h2>
-                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs uppercase tracking-wide text-zinc-400">
-                  {card.provider}
-                </span>
+              <div className="mb-3 flex items-center justify-between gap-2 border-b border-rule pb-2">
+                <span className="font-mono text-xs text-ink-soft">{consignmentNo(card.id)}</span>
+                <span className="label-caps text-[10px] text-ink-soft">via {card.provider}</span>
               </div>
+              <h2 className="text-lg font-semibold leading-snug text-ink">{card.name}</h2>
               {card.progress ? (
                 <>
-                  <ProgressBar percent={card.progress.percentByIssues} label="Overall progress" />
-                  <dl className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-                    <div className="rounded-md bg-zinc-800/60 p-2">
-                      <dt className="text-zinc-500">Tasks done</dt>
-                      <dd className="mt-0.5 font-medium text-zinc-200">
-                        {card.progress.closedIssues}/{card.progress.totalIssues}
-                      </dd>
-                    </div>
-                    <div className="rounded-md bg-zinc-800/60 p-2">
-                      <dt className="text-zinc-500">Est. total</dt>
-                      <dd className="mt-0.5 font-medium text-zinc-200">
-                        {formatMinutes(card.progress.totalMinutes) ?? "—"}
-                      </dd>
-                    </div>
-                    <div className="rounded-md bg-zinc-800/60 p-2">
-                      <dt className="text-zinc-500">Remaining</dt>
-                      <dd className="mt-0.5 font-medium text-zinc-200">
-                        {formatMinutes(card.progress.remainingMinutes) ?? "—"}
-                      </dd>
-                    </div>
-                  </dl>
+                  <div className="mt-4">
+                    <RouteLine
+                      percent={card.progress.percentByIssues}
+                      startLabel="Kickoff"
+                      endLabel={etaLabel(card.forecast)}
+                    />
+                  </div>
+                  <FieldGrid className="mt-4 grid-cols-3">
+                    <FieldBox
+                      label="Tasks done"
+                      value={`${card.progress.closedIssues}/${card.progress.totalIssues}`}
+                    />
+                    <FieldBox label="Est. total" value={formatMinutes(card.progress.totalMinutes) ?? "—"} />
+                    <FieldBox
+                      label="Remaining"
+                      value={formatMinutes(card.progress.remainingMinutes) ?? "—"}
+                    />
+                  </FieldGrid>
                   {card.forecast && (
-                    <p className="mt-3 flex items-center gap-1.5 text-xs text-zinc-400">
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${
-                          card.forecast.status === "complete"
-                            ? "bg-emerald-500"
-                            : card.forecast.status === "stalled"
-                              ? "bg-amber-500"
-                              : "bg-indigo-500"
-                        }`}
-                      />
+                    <p className="mt-4 flex items-center gap-2 text-xs text-ink-soft">
+                      <Stamp tone={forecastStamp(card.forecast).tone}>
+                        {forecastStamp(card.forecast).label}
+                      </Stamp>
                       {forecastLabel(card.forecast)}
                     </p>
                   )}
                 </>
               ) : (
-                <p className="text-sm text-red-400">
+                <p className="mt-3 text-sm font-medium text-exception">
                   Could not load progress from {card.provider}. Please try again later.
                 </p>
               )}

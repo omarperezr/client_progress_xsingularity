@@ -68,24 +68,22 @@ export function MeetingUpload({ projectId }: { projectId: number }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-3">
-      <label className="block text-sm text-zinc-400">
-        Zoom recording (audio-only .m4a preferred, max 25MB) or a .txt transcript
+      <label className="block">
+        <span className="label-caps mb-1 block text-[11px] text-ink-soft">
+          Zoom recording (audio-only .m4a preferred, max 25MB) or a .txt transcript
+        </span>
         <input
           ref={inputRef}
           type="file"
           accept="audio/*,video/mp4,.txt,text/plain"
           required
-          className="mt-1 block w-full text-sm text-zinc-300 file:mr-3 file:rounded-md file:border-0 file:bg-zinc-800 file:px-3 file:py-1.5 file:text-sm file:text-zinc-200 hover:file:bg-zinc-700"
+          className="block w-full border border-dashed border-rule-mid bg-sheet-dim p-2 text-sm text-ink-soft"
         />
       </label>
-      <button
-        type="submit"
-        disabled={busy}
-        className="rounded-md bg-white px-4 py-2 text-sm font-medium text-zinc-900 hover:bg-zinc-200 disabled:opacity-50"
-      >
+      <button type="submit" disabled={busy} className="btn btn-primary px-4 py-2 text-xs">
         {busy ? "Working…" : "Upload & transcribe"}
       </button>
-      {state && <p className="text-sm text-amber-400">{state}</p>}
+      {state && <p className="text-sm font-medium text-hold">{state}</p>}
     </form>
   );
 }

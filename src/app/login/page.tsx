@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessionCompany } from "@/lib/auth";
 import { PendingButton } from "@/components/PendingButton";
+import { Barcode } from "@/components/Manifest";
 import { login } from "../actions";
 
 export const metadata = { title: "Sign in · Client Progress" };
@@ -20,52 +21,50 @@ export default async function LoginPage({
   const { error } = await searchParams;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+    <main className="flex min-h-screen items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
-            Client Progress
-          </h1>
-          <p className="mt-1 text-sm text-zinc-400">by xSingularity</p>
+        <div className="mb-6 flex items-center gap-3 text-ink">
+          <Barcode className="h-6" />
+          <div>
+            <h1 className="label-caps text-2xl leading-none">Client Progress</h1>
+            <p className="mt-1 font-mono text-[11px] text-ink-soft">
+              xSingularity · carrier of record
+            </p>
+          </div>
         </div>
-        <form
-          action={login}
-          className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl"
-        >
+        <form action={login} className="sheet space-y-4 p-6 shadow-sheet-raised">
+          <p className="label-caps border-b border-rule pb-2 text-xs text-ink">
+            Consignee sign-in
+          </p>
           {error && (
-            <p className="rounded-md bg-red-500/10 px-3 py-2 text-sm text-red-400">
+            <p className="border border-exception bg-exception/5 px-3 py-2 text-sm font-medium text-exception">
               {ERROR_MESSAGES[error] ?? "Something went wrong. Try again."}
             </p>
           )}
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-zinc-300">Username</span>
-            <input
-              name="username"
-              autoComplete="username"
-              required
-              className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500"
-            />
+            <span className="label-caps mb-1 block text-[11px] text-ink-soft">Username</span>
+            <input name="username" autoComplete="username" required className="input" />
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-zinc-300">Password</span>
+            <span className="label-caps mb-1 block text-[11px] text-ink-soft">Password</span>
             <input
               name="password"
               type="password"
               autoComplete="current-password"
               required
-              className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500"
+              className="input"
             />
           </label>
-          <PendingButton
-            pendingText="Signing in…"
-            className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
-          >
+          <PendingButton pendingText="Signing in…" className="btn btn-primary w-full px-4 py-2.5 text-xs">
             Sign in
           </PendingButton>
         </form>
-        <p className="mt-6 text-center text-sm text-zinc-500">
+        <p className="mt-6 text-center text-sm text-ink-soft">
           xSingularity team?{" "}
-          <Link href="/admin/login" className="text-indigo-400 hover:text-indigo-300">
+          <Link
+            href="/admin/login"
+            className="font-medium text-transit underline decoration-rule-mid transition-colors hover:decoration-transit"
+          >
             Admin sign-in
           </Link>
         </p>

@@ -57,20 +57,17 @@ export default async function AdminCompanyPage({
   );
 
   return (
-    <div className="min-h-screen w-full bg-zinc-950">
+    <div className="min-h-screen w-full">
       <AdminHeader admin={admin} />
       <main className="mx-auto w-full max-w-6xl px-4 py-8">
-        <Link href="/admin" className="text-sm text-zinc-400 hover:text-zinc-200">
+        <Link href="/admin" className="label-caps text-xs text-ink-soft transition-colors hover:text-ink">
           ← All clients
         </Link>
-        <div className="mt-3 mb-6 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-semibold text-white">{company.name}</h1>
+        <div className="mt-3 mb-6 flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink pb-3">
+          <h1 className="text-2xl font-semibold leading-tight text-ink">{company.name}</h1>
           <form action={impersonateCompany}>
             <input type="hidden" name="id" value={company.id} />
-            <PendingButton
-              className="rounded-md border border-indigo-500/40 px-3 py-1.5 text-sm text-indigo-300 transition hover:bg-indigo-500/10"
-              title="Open this client's own dashboard"
-            >
+            <PendingButton className="btn px-3 py-1.5 text-[11px]" title="Open this client's own dashboard">
               View as {company.name}
             </PendingButton>
           </form>
@@ -81,38 +78,35 @@ export default async function AdminCompanyPage({
           <div className="space-y-6">
             <Card title="Projects" description="Each project is backed by one repository.">
               {company.projects.length === 0 ? (
-                <p className="text-sm text-zinc-500">No projects yet.</p>
+                <p className="text-sm text-ink-soft">No projects yet.</p>
               ) : (
                 <ul className="space-y-3">
                   {company.projects.map((project) => {
                     const progress = progressByProject.get(project.id) ?? null;
                     return (
-                      <li
-                        key={project.id}
-                        className="rounded-lg border border-zinc-800 bg-zinc-950 p-4"
-                      >
+                      <li key={project.id} className="border border-rule bg-sheet-dim/60 p-4">
                         <div className="mb-2 flex items-center justify-between gap-3">
                           <Link
                             href={`/admin/projects/${project.id}`}
-                            className="text-sm font-medium text-white hover:underline"
+                            className="text-sm font-medium text-ink hover:underline"
                           >
                             {project.name}
                           </Link>
-                          <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] uppercase tracking-wide text-zinc-400">
+                          <span className="font-mono text-[10px] text-ink-soft">
                             {project.provider}:{project.repo}
                           </span>
                         </div>
                         {progress ? (
                           <>
                             <ProgressBar percent={progress.percentByIssues} />
-                            <p className="mt-2 text-xs text-zinc-500">
+                            <p className="mt-2 font-mono text-xs text-ink-soft">
                               {progress.closedIssues}/{progress.totalIssues} tasks ·{" "}
                               {formatMinutes(progress.totalMinutes) ?? "—"} estimated ·{" "}
                               {formatMinutes(progress.remainingMinutes) ?? "—"} remaining
                             </p>
                           </>
                         ) : (
-                          <p className="text-xs text-red-400">
+                          <p className="text-xs font-medium text-exception">
                             Could not load issues from {project.provider}.
                           </p>
                         )}

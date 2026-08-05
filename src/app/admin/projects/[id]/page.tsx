@@ -54,18 +54,18 @@ export default async function AdminProjectPage({
   const progress = issues ? computeProgress(issues) : null;
 
   return (
-    <div className="min-h-screen w-full bg-zinc-950">
+    <div className="min-h-screen w-full">
       <AdminHeader admin={admin} />
       <main className="mx-auto w-full max-w-6xl px-4 py-8">
         <Link
           href={`/admin/companies/${project.companyId}`}
-          className="text-sm text-zinc-400 hover:text-zinc-200"
+          className="label-caps text-xs text-ink-soft transition-colors hover:text-ink"
         >
           ← {project.company.name}
         </Link>
-        <div className="mt-3 mb-6 flex items-center gap-3">
-          <h1 className="text-xl font-semibold text-white">{project.name}</h1>
-          <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs uppercase tracking-wide text-zinc-400">
+        <div className="mt-3 mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-b-2 border-ink pb-3">
+          <h1 className="text-2xl font-semibold leading-tight text-ink">{project.name}</h1>
+          <span className="font-mono text-xs text-ink-soft">
             {project.provider}:{project.repo}
           </span>
         </div>
@@ -82,7 +82,7 @@ export default async function AdminProjectPage({
                       <ProgressBar percent={progress.percentByTime} label="By estimated time" />
                     </div>
                   )}
-                  <dl className="mt-5 grid grid-cols-2 gap-3 text-center text-sm sm:grid-cols-4">
+                  <dl className="mt-5 grid grid-cols-2 gap-px border border-ink bg-ink sm:grid-cols-4">
                     <MiniStat
                       label="Tasks done"
                       value={`${progress.closedIssues}/${progress.totalIssues}`}
@@ -102,7 +102,7 @@ export default async function AdminProjectPage({
                   </dl>
                 </>
               ) : (
-                <p className="text-sm text-red-400">
+                <p className="text-sm font-medium text-exception">
                   Could not load issues from {project.provider}. Check the repo path, the token and
                   the base URL.
                 </p>
@@ -110,18 +110,18 @@ export default async function AdminProjectPage({
             </Card>
 
             {issues && (
-              <div className="overflow-x-auto rounded-xl border border-zinc-800">
+              <div className="sheet overflow-x-auto">
                 <table className="w-full min-w-[640px] text-left text-sm">
-                  <thead className="bg-zinc-900 text-xs uppercase tracking-wide text-zinc-500">
+                  <thead className="label-caps border-b border-ink text-[10px] text-ink-soft">
                     <tr>
-                      <th className="px-4 py-3 font-medium">Status</th>
-                      <th className="px-4 py-3 font-medium">Task</th>
-                      <th className="px-4 py-3 font-medium">Assigned to</th>
-                      <th className="px-4 py-3 font-medium">Estimate</th>
-                      <th className="px-4 py-3 font-medium">Time spent</th>
+                      <th className="px-4 py-3 font-semibold">Status</th>
+                      <th className="px-4 py-3 font-semibold">Task</th>
+                      <th className="px-4 py-3 font-semibold">Assigned to</th>
+                      <th className="px-4 py-3 font-semibold">Estimate</th>
+                      <th className="px-4 py-3 font-semibold">Time spent</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-800 bg-zinc-950">
+                  <tbody className="divide-y divide-rule">
                     {[...issues]
                       .sort((a, b) =>
                         a.state === b.state ? a.id - b.id : a.state === "open" ? -1 : 1,
@@ -130,16 +130,12 @@ export default async function AdminProjectPage({
                         <tr key={issue.id}>
                           <td className="px-4 py-3">
                             {issue.state === "closed" ? (
-                              <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-400">
-                                Done
-                              </span>
+                              <span className="stamp text-[10px] text-delivered">Done</span>
                             ) : (
-                              <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-400">
-                                In progress
-                              </span>
+                              <span className="stamp text-[10px] text-transit">In progress</span>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-zinc-200">
+                          <td className="px-4 py-3 font-medium text-ink">
                             <a
                               href={issue.url}
                               target="_blank"
@@ -149,20 +145,20 @@ export default async function AdminProjectPage({
                               {issue.title}
                             </a>
                           </td>
-                          <td className="px-4 py-3 text-zinc-400">
+                          <td className="px-4 py-3 font-mono text-xs text-ink-soft">
                             {issue.assignees.length ? issue.assignees.join(", ") : "—"}
                           </td>
-                          <td className="px-4 py-3 text-zinc-400">
+                          <td className="px-4 py-3 font-mono text-xs text-ink-soft">
                             {formatMinutes(issue.estimateMinutes) ?? "—"}
                           </td>
-                          <td className="px-4 py-3 text-zinc-400">
+                          <td className="px-4 py-3 font-mono text-xs text-ink-soft">
                             {formatMinutes(issue.spentMinutes) ?? "—"}
                           </td>
                         </tr>
                       ))}
                     {issues.length === 0 && (
                       <tr>
-                        <td colSpan={5} className="px-4 py-6 text-center text-zinc-500">
+                        <td colSpan={5} className="px-4 py-6 text-center text-ink-soft">
                           No issues in this repo yet.
                         </td>
                       </tr>
@@ -180,35 +176,30 @@ export default async function AdminProjectPage({
             >
               <MeetingUpload projectId={project.id} />
               <details className="mt-4">
-                <summary className="cursor-pointer text-sm text-zinc-400 hover:text-zinc-200">
+                <summary className="cursor-pointer text-sm font-medium text-ink-soft transition-colors hover:text-ink">
                   Or paste a transcript instead
                 </summary>
                 <form action={createMeetingFromTranscript} className="mt-3 space-y-3">
                   <input type="hidden" name="projectId" value={project.id} />
                   <Field label="Title" name="title" placeholder="Kick-off call notes" />
-                  <label className="block text-sm text-zinc-400">
-                    Transcript
-                    <textarea
-                      name="transcript"
-                      rows={6}
-                      required
-                      className="mt-1 block w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-200"
-                    />
+                  <label className="block">
+                    <span className="label-caps mb-1 block text-[11px] text-ink-soft">Transcript</span>
+                    <textarea name="transcript" rows={6} required className="input" />
                   </label>
                   <SubmitButton pendingText="Saving…">Save transcript</SubmitButton>
                 </form>
               </details>
               {project.meetings.length > 0 && (
-                <ul className="mt-4 space-y-2">
+                <ul className="mt-4 divide-y divide-rule border-t border-rule">
                   {project.meetings.map((m) => (
-                    <li key={m.id}>
+                    <li key={m.id} className="py-2">
                       <Link
                         href={`/admin/meetings/${m.id}`}
-                        className="text-sm text-zinc-200 hover:underline"
+                        className="text-sm font-medium text-ink hover:underline"
                       >
                         {m.filename}
                       </Link>
-                      <span className="ml-2 text-xs text-zinc-500">
+                      <span className="ml-2 font-mono text-xs text-ink-soft">
                         {m.status}
                         {m._count.draftIssues ? ` · ${m._count.draftIssues} drafts` : ""} ·{" "}
                         {m.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
@@ -273,9 +264,9 @@ export default async function AdminProjectPage({
 
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md bg-zinc-800/60 p-3">
-      <dt className="text-xs text-zinc-500">{label}</dt>
-      <dd className="mt-1 font-medium text-zinc-200">{value}</dd>
+    <div className="bg-sheet px-3 py-2">
+      <dt className="label-caps text-[10px] text-ink-soft">{label}</dt>
+      <dd className="mt-0.5 font-mono text-sm font-semibold text-ink">{value}</dd>
     </div>
   );
 }

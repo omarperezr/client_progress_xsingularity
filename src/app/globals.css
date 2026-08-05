@@ -1,26 +1,300 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Freight Manifest — the visual world of Client Progress.
+ * A project is a tracked consignment: manifest paper, ruled field boxes,
+ * mono data, checkpoint route lines, and rubber status stamps.
+ */
+
+@theme {
+  /* Night dispatch: dark desk, dark sheets, light ink. Dark-only by design. */
+  --color-paper: #131110; /* desk / page ground */
+  --color-sheet: #1d1b17; /* the waybill sheet itself */
+  --color-sheet-dim: #26231d; /* recessed panel on a sheet */
+  --color-ink: #ece8dd; /* primary ink (light on dark) */
+  --color-ink-soft: #b3ac9c; /* secondary ink */
+  --color-ink-faint: #7d776a; /* tertiary / axis ink */
+  --color-rule: #34312a; /* subtle table rules */
+  --color-rule-mid: #56514a; /* mid rules, input borders */
+
+  /* Signal roles (stamp inks) */
+  --color-cargo: #f0561a; /* international orange — primary action & attention */
+  --color-cargo-deep: #c74310; /* pressed / hover orange */
+  --color-transit: #6f9fd8; /* in transit, links */
+  --color-delivered: #55b183; /* delivered / done */
+  --color-exception: #d4574c; /* exceptions, errors, void */
+  --color-hold: #d9a021; /* customs-hold amber — stalled, inspection */
+  --color-hold-bg: #f5d54a; /* hazard band fill (always yellow) */
+
+  --font-sans: var(--font-barlow);
+  --font-condensed: var(--font-barlow-condensed);
+  --font-mono: var(--font-overpass-mono);
+
+  --shadow-sheet: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 16px -6px rgb(0 0 0 / 0.5);
+  --shadow-sheet-raised: 0 2px 4px rgb(0 0 0 / 0.35), 0 12px 28px -8px rgb(0 0 0 / 0.6);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  /* Faint ledger grain: horizontal ruling far in the background of the desk. */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 31px,
+    rgb(236 232 221 / 0.03) 31px,
+    rgb(236 232 221 / 0.03) 32px
+  );
+}
+
+/* ---- Browser surfaces carry the world too ---- */
+
+::selection {
+  background: var(--color-cargo);
+  color: var(--color-paper);
+}
+
+input,
+textarea {
+  caret-color: var(--color-cargo);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-rule-mid) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-rule-mid);
+  border: 3px solid var(--color-paper);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+a {
+  text-underline-offset: 3px;
+}
+
+/* Numerals in data read like a printed manifest. */
+.tabular,
+table,
+dd {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- World components ---- */
+
+/* A waybill sheet: the primary surface. */
+.sheet {
+  background: var(--color-sheet);
+  border: 1px solid var(--color-ink);
+  box-shadow: var(--shadow-sheet);
+}
+
+/* Condensed caps used for field labels, stamps, and plate headings. */
+.label-caps {
+  font-family: var(--font-condensed), var(--font-sans), sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Rubber stamp chip. Color comes from a border/text utility on the element. */
+.stamp {
+  font-family: var(--font-condensed), var(--font-sans), sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1.5px solid currentColor;
+  /* Double-strike rule: the outer ghost ring a rubber stamp leaves */
+  outline: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  outline-offset: 1.5px;
+  padding: 0.1rem 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  transform: rotate(-2deg);
+}
+
+/* The one authored motion moment: a stamp lands on load. */
+.stamp-landing {
+  animation: stamp-land 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes stamp-land {
+  0% {
+    opacity: 0;
+    transform: scale(1.6) rotate(-8deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.94) rotate(-3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-2deg);
+  }
+}
+
+/* Route line: filled leg of the journey grows in on load. */
+.route-fill {
+  animation: route-grow 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: left center;
+}
+
+@keyframes route-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp-landing,
+  .route-fill {
+    animation: none;
+  }
+  .shimmer {
+    animation: none;
+  }
+}
+
+/* Loading shimmer on paper. */
+.shimmer {
+  background: linear-gradient(
+    100deg,
+    var(--color-sheet-dim) 40%,
+    var(--color-sheet) 50%,
+    var(--color-sheet-dim) 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-slide 1.4s ease-in-out infinite;
+  border: 1px solid var(--color-rule);
+}
+
+@keyframes shimmer-slide {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+/* ---- Controls ---- */
+
+.btn {
+  font-family: var(--font-condensed), var(--font-sans), sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--color-ink);
+  background: var(--color-sheet);
+  color: var(--color-ink);
+  line-height: 1.3;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
+  cursor: pointer;
+}
+.btn:hover {
+  background: var(--color-sheet-dim);
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
+.btn-primary {
+  background: var(--color-cargo);
+  border-color: var(--color-cargo);
+  color: var(--color-paper);
+}
+.btn-primary:hover {
+  background: var(--color-cargo-deep);
+  color: var(--color-paper);
+}
+
+.btn-void {
+  background: var(--color-exception);
+  border-color: var(--color-exception);
+  color: var(--color-paper);
+}
+.btn-void:hover {
+  background: #b23c31;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid var(--color-rule-mid);
+  background: var(--color-sheet);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--color-ink);
+}
+.input::placeholder {
+  color: var(--color-ink-soft);
+  opacity: 1;
+}
+
+input[type="file"]::file-selector-button {
+  font-family: var(--font-condensed), var(--font-sans), sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  border: 1px solid var(--color-ink);
+  background: var(--color-sheet);
+  color: var(--color-ink);
+  padding: 0.35rem 0.75rem;
+  margin-right: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+input[type="file"]::file-selector-button:hover {
+  background: var(--color-sheet-dim);
+}
+
+/* Hazard band for inspection (impersonation) mode. */
+.hazard-band {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-hold-bg) 0,
+    var(--color-hold-bg) 14px,
+    #e3c33e 14px,
+    #e3c33e 28px
+  );
 }

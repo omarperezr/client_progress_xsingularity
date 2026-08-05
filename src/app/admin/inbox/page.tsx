@@ -43,24 +43,26 @@ export default async function AdminInboxPage() {
   const answered = sortByNewest(all.filter((m) => m.answered));
 
   return (
-    <div className="min-h-screen w-full bg-zinc-950">
+    <div className="min-h-screen w-full">
       <AdminHeader admin={admin} />
       <main className="mx-auto w-full max-w-4xl px-4 py-8">
-        <Link href="/admin" className="text-sm text-zinc-400 hover:text-zinc-200">
-          ← Admin
+        <Link href="/admin" className="label-caps text-xs text-ink-soft transition-colors hover:text-ink">
+          ← Operations board
         </Link>
-        <h1 className="mt-3 mb-2 text-xl font-semibold text-white">Client messages</h1>
-        <p className="mb-6 text-sm text-zinc-500">
+        <div className="mt-3 mb-2 border-b-2 border-ink pb-2">
+          <h1 className="label-caps text-2xl text-ink">Correspondence</h1>
+        </div>
+        <p className="mb-6 text-sm text-ink-soft">
           Comments clients left on their tasks through the app. “Awaiting reply” means no one has
           responded on the issue since the client’s last message.
         </p>
 
         <section className="mb-8">
-          <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-amber-400">
+          <h2 className="label-caps mb-3 text-sm text-exception">
             Awaiting reply ({awaiting.length})
           </h2>
           {awaiting.length === 0 ? (
-            <p className="text-sm text-zinc-500">Nothing waiting. 👍</p>
+            <p className="text-sm text-ink-soft">Nothing waiting.</p>
           ) : (
             <ul className="space-y-3">
               {awaiting.map((m) => (
@@ -72,7 +74,7 @@ export default async function AdminInboxPage() {
 
         {answered.length > 0 && (
           <section>
-            <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-zinc-500">
+            <h2 className="label-caps mb-3 text-sm text-ink-soft">
               Answered ({answered.length})
             </h2>
             <ul className="space-y-3 opacity-70">
@@ -89,25 +91,28 @@ export default async function AdminInboxPage() {
 
 function MessageCard({ m }: { m: ClientMessage }) {
   return (
-    <li className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-      <div className="mb-1 flex items-center justify-between gap-2 text-xs text-zinc-500">
+    <li className="sheet p-4">
+      <div className="mb-1 flex items-center justify-between gap-2 font-mono text-xs text-ink-soft">
         <span>
-          <span className="font-medium text-zinc-300">{m.companyName}</span> · {m.projectName}
+          <span className="font-semibold text-ink">{m.companyName}</span> · {m.projectName}
         </span>
         <span>{ago(m.createdAt)}</span>
       </div>
-      <p className="text-sm font-medium text-zinc-200">{m.issueTitle}</p>
-      <p className="mt-1 whitespace-pre-wrap text-sm text-zinc-400">{m.text}</p>
+      <p className="text-sm font-semibold text-ink">{m.issueTitle}</p>
+      <p className="mt-1 whitespace-pre-wrap text-sm text-ink-soft">{m.text}</p>
       <div className="mt-3 flex gap-4 text-xs">
         <a
           href={m.issueUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-indigo-400 hover:text-indigo-300"
+          className="font-medium text-transit hover:underline"
         >
-          Reply on {m.provider} →
+          Reply on {m.provider}
         </a>
-        <Link href={`/admin/projects/${m.projectId}`} className="text-zinc-400 hover:text-zinc-200">
+        <Link
+          href={`/admin/projects/${m.projectId}`}
+          className="text-ink-soft transition-colors hover:text-ink"
+        >
           Manage project
         </Link>
       </div>

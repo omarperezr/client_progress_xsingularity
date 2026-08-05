@@ -10,6 +10,7 @@ import { formatMinutes } from "@/lib/estimate";
 import { Header } from "@/components/Header";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { ProgressBar } from "@/components/ProgressBar";
+import { FieldGrid, FieldBox, Stamp, consignmentNo, forecastStamp } from "@/components/Manifest";
 import { Burnup, VelocityChart, StatusBar, BreakdownList } from "@/components/Charts";
 import { IssueRow, type IssueRowData } from "@/components/IssueRow";
 import { PendingButton } from "@/components/PendingButton";
@@ -40,23 +41,26 @@ export default async function ProjectPage({
   }
 
   return (
-    <div className="min-h-screen w-full bg-zinc-950">
+    <div className="min-h-screen w-full">
       <ImpersonationBanner companyName={company.name} />
       <Header companyName={company.name} />
       <main className="mx-auto w-full max-w-6xl px-4 py-8">
-        <Link href="/" className="text-sm text-zinc-400 hover:text-zinc-200">
-          ← All projects
+        <Link
+          href="/"
+          className="label-caps text-xs text-ink-soft transition-colors hover:text-ink"
+        >
+          ← Project manifest
         </Link>
-        <div className="mt-3 mb-6 flex items-center gap-3">
-          <h1 className="text-xl font-semibold text-white">{project.name}</h1>
-          <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs uppercase tracking-wide text-zinc-400">
-            {project.provider}
+        <div className="mt-3 mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-b-2 border-ink pb-3">
+          <h1 className="text-2xl font-semibold leading-tight text-ink">{project.name}</h1>
+          <span className="font-mono text-xs text-ink-soft">
+            {consignmentNo(project.id)} · via {project.provider}
           </span>
           <form action={refreshProject.bind(null, projectId)} className="ml-auto">
             <PendingButton
               pendingText="Refreshing…"
               title={`Fetch the latest tasks from ${project.provider}`}
-              className="rounded-md border border-zinc-800 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-900"
+              className="btn px-3 py-1.5 text-[11px]"
             >
               Refresh
             </PendingButton>
@@ -64,7 +68,7 @@ export default async function ProjectPage({
         </div>
 
         {!issues ? (
-          <p className="rounded-md bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          <p className="border border-exception bg-exception/5 px-4 py-3 text-sm font-medium text-exception">
             Could not load issues from {project.provider}. Please try again later.
           </p>
         ) : (
@@ -106,7 +110,7 @@ function Dashboard({
       {/* Headline: forecast + progress */}
       <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
         <ForecastCard forecast={a.forecast} remainingMinutes={progress.remainingMinutes} />
-        <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+        <section className="sheet p-5">
           <ProgressBar percent={progress.percentByIssues} label="Overall progress (by tasks)" />
           {progress.percentByTime !== null && (
             <div className="mt-4">
@@ -114,24 +118,26 @@ function Dashboard({
             </div>
           )}
           <div className="mt-4">
-            <p className="mb-2 text-xs uppercase tracking-wide text-zinc-500">Task status</p>
+            <p className="label-caps mb-2 text-[10px] text-ink-soft">Task status</p>
             <StatusBar status={a.status} />
           </div>
         </section>
       </div>
 
       {/* Key numbers */}
-      <dl
-        className={`grid grid-cols-2 gap-3 text-center text-sm ${hasTimeSpent ? "sm:grid-cols-5" : "sm:grid-cols-4"}`}
-      >
-        <Stat label="Tasks done" value={`${progress.closedIssues}/${progress.totalIssues}`} />
-        <Stat label="Est. project total" value={formatMinutes(progress.totalMinutes) ?? "—"} />
-        <Stat label="Est. completed" value={formatMinutes(progress.doneMinutes) ?? "—"} />
+      <FieldGrid className={`grid-cols-2 ${hasTimeSpent ? "sm:grid-cols-5" : "sm:grid-cols-4"}`}>
+        <FieldBox label="Tasks done" value={`${progress.closedIssues}/${progress.totalIssues}`} />
+        <FieldBox label="Est. project total" value={formatMinutes(progress.totalMinutes) ?? "—"} />
+        <FieldBox label="Est. completed" value={formatMinutes(progress.doneMinutes) ?? "—"} />
         {hasTimeSpent && (
-          <Stat label="Time logged" value={formatMinutes(progress.spentMinutes) ?? "—"} />
+          <FieldBox label="Time logged" value={formatMinutes(progress.spentMinutes) ?? "—"} />
         )}
-        <Stat label="Est. remaining" value={formatMinutes(progress.remainingMinutes) ?? "—"} />
-      </dl>
+        <FieldBox
+          label="Est. remaining"
+          value={formatMinutes(progress.remainingMinutes) ?? "—"}
+          className={hasTimeSpent ? "max-sm:col-span-2" : ""}
+        />
+      </FieldGrid>
 
       {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -168,9 +174,9 @@ function Dashboard({
 
       {/* Activity + risk */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card title="Recently completed">
+        <Card title="Recently delivered">
           {a.recentlyClosed.length === 0 ? (
-            <p className="text-sm text-zinc-500">Nothing completed yet.</p>
+            <p className="text-sm text-ink-soft">Nothing completed yet.</p>
           ) : (
             <ul className="space-y-2 text-sm">
               {a.recentlyClosed.map((i) => (
@@ -179,11 +185,11 @@ function Dashboard({
                     href={i.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="min-w-0 flex-1 truncate text-zinc-300 hover:underline"
+                    className="min-w-0 flex-1 truncate text-ink hover:underline"
                   >
                     {i.title}
                   </a>
-                  <span className="shrink-0 text-xs text-zinc-500">
+                  <span className="shrink-0 font-mono text-xs text-ink-soft">
                     {i.closedAt ? relative(i.closedAt) : ""}
                   </span>
                 </li>
@@ -191,12 +197,9 @@ function Dashboard({
             </ul>
           )}
         </Card>
-        <Card
-          title="Needs attention"
-          hint="Open tasks with no update in over two weeks."
-        >
+        <Card title="Needs attention" hint="Open tasks with no update in over two weeks.">
           {a.stale.length === 0 ? (
-            <p className="text-sm text-zinc-500">All open tasks have recent activity. 👍</p>
+            <p className="text-sm text-ink-soft">All open tasks have recent activity.</p>
           ) : (
             <ul className="space-y-2 text-sm">
               {a.stale.slice(0, 6).map((i) => (
@@ -205,11 +208,13 @@ function Dashboard({
                     href={i.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="min-w-0 flex-1 truncate text-amber-300/90 hover:underline"
+                    className="min-w-0 flex-1 truncate font-medium text-hold hover:underline"
                   >
                     {i.title}
                   </a>
-                  <span className="shrink-0 text-xs text-zinc-500">{relative(i.updatedAt)}</span>
+                  <span className="shrink-0 font-mono text-xs text-ink-soft">
+                    {relative(i.updatedAt)}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -219,18 +224,16 @@ function Dashboard({
 
       {/* Task list with comments / email */}
       <section>
-        <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-zinc-400">Tasks</h2>
+        <div className="mb-3 flex items-baseline justify-between gap-2">
+          <h2 className="label-caps text-sm text-ink">Task manifest</h2>
+          <span className="font-mono text-xs text-ink-soft">{rows.length} line items</span>
+        </div>
         {rows.length === 0 ? (
-          <p className="text-sm text-zinc-500">No tasks created yet.</p>
+          <p className="text-sm text-ink-soft">No tasks created yet.</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="sheet divide-y divide-rule">
             {rows.map((row) => (
-              <IssueRow
-                key={row.id}
-                projectId={projectId}
-                issue={row}
-                emailEnabled={emailEnabled}
-              />
+              <IssueRow key={row.id} projectId={projectId} issue={row} emailEnabled={emailEnabled} />
             ))}
           </ul>
         )}
@@ -247,41 +250,45 @@ function ForecastCard({
   remainingMinutes: number;
 }) {
   const pace = `${forecast.perWeekIssues.toFixed(1)} task${forecast.perWeekIssues === 1 ? "" : "s"}/week`;
+  const stamp = forecastStamp(forecast);
 
   let headline: string;
   let sub: string;
-  let tone = "text-white";
   switch (forecast.status) {
     case "complete":
-      headline = "Project complete";
+      headline = "Delivered";
       sub = "All tasks are done.";
-      tone = "text-emerald-400";
       break;
     case "projected":
       headline = fmtDate(forecast.etaDate!);
-      sub = `Projected finish at the current pace (${pace}, last 6 weeks). ~${Math.max(
+      sub = `Projected arrival at the current pace (${pace}, last 6 weeks). ~${Math.max(
         1,
         Math.ceil(forecast.weeksRemaining ?? 0),
       )} weeks, ${formatMinutes(remainingMinutes) ?? "—"} of work left.`;
       break;
     case "stalled":
-      headline = "Paused";
-      sub = "No tasks have been completed in the last 6 weeks, so there's no finish estimate yet.";
-      tone = "text-amber-400";
+      headline = "On hold";
+      sub = "No tasks have been completed in the last 6 weeks, so there's no arrival estimate yet.";
       break;
     default:
       headline = "Getting started";
-      sub = "Not enough completed work yet to project a finish date.";
-      tone = "text-zinc-300";
+      sub = "Not enough completed work yet to project an arrival date.";
   }
 
   return (
-    <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-      <p className="text-xs uppercase tracking-wide text-zinc-500">Projected completion</p>
-      <p className={`mt-2 text-3xl font-semibold ${tone}`}>{headline}</p>
-      <p className="mt-2 text-sm text-zinc-400">{sub}</p>
+    <section className="sheet relative p-5">
+      <div className="flex items-start justify-between gap-3">
+        <p className="label-caps text-[10px] text-ink-soft">Projected arrival</p>
+        <Stamp tone={stamp.tone} landing>
+          {stamp.label}
+        </Stamp>
+      </div>
+      <p className="mt-2 font-condensed text-4xl font-bold uppercase leading-none tracking-wide text-ink">
+        {headline}
+      </p>
+      <p className="mt-3 max-w-prose text-sm text-ink-soft">{sub}</p>
       {forecast.status === "projected" && (
-        <p className="mt-3 text-xs text-zinc-600">
+        <p className="mt-3 text-xs text-ink-soft">
           Estimate based on recent throughput; it shifts as the pace changes.
         </p>
       )}
@@ -299,22 +306,13 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-      <div className="mb-4">
-        <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-400">{title}</h2>
-        {hint && <p className="mt-0.5 text-xs text-zinc-500">{hint}</p>}
+    <section className="sheet p-5">
+      <div className="mb-4 border-b border-rule pb-2">
+        <h2 className="label-caps text-xs text-ink">{title}</h2>
+        {hint && <p className="mt-0.5 text-xs text-ink-soft">{hint}</p>}
       </div>
       {children}
     </section>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md bg-zinc-800/60 p-3">
-      <dt className="text-xs text-zinc-500">{label}</dt>
-      <dd className="mt-1 font-medium text-zinc-200">{value}</dd>
-    </div>
   );
 }
 

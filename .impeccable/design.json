@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-05T00:00:00Z",
+  "title": "Design System: Client Progress",
+  "extensions": {
+    "colorMeta": {
+      "paper": { "role": "neutral", "displayName": "Desk", "canonical": "#131110", "tonalRamp": ["oklch(15% 0.008 70)", "oklch(25% 0.008 70)", "oklch(37% 0.008 70)", "oklch(49% 0.008 70)", "oklch(61% 0.008 70)", "oklch(73% 0.008 70)", "oklch(85% 0.008 70)", "oklch(95% 0.008 70)"] },
+      "sheet": { "role": "neutral", "displayName": "Sheet", "canonical": "#1d1b17", "tonalRamp": ["oklch(15% 0.012 85)", "oklch(25% 0.012 85)", "oklch(37% 0.012 85)", "oklch(49% 0.012 85)", "oklch(61% 0.012 85)", "oklch(73% 0.012 85)", "oklch(85% 0.012 85)", "oklch(95% 0.012 85)"] },
+      "ink": { "role": "neutral", "displayName": "Paper Ink", "canonical": "#ece8dd", "tonalRamp": ["oklch(15% 0.015 95)", "oklch(25% 0.015 95)", "oklch(37% 0.015 95)", "oklch(49% 0.015 95)", "oklch(61% 0.015 95)", "oklch(73% 0.015 95)", "oklch(85% 0.015 95)", "oklch(95% 0.015 95)"] },
+      "ink-soft": { "role": "neutral", "displayName": "Soft Ink", "canonical": "#b3ac9c", "tonalRamp": ["oklch(15% 0.02 95)", "oklch(25% 0.02 95)", "oklch(37% 0.02 95)", "oklch(49% 0.02 95)", "oklch(61% 0.02 95)", "oklch(73% 0.02 95)", "oklch(85% 0.02 95)", "oklch(95% 0.02 95)"] },
+      "rule-mid": { "role": "neutral", "displayName": "Mid Rule", "canonical": "#56514a", "tonalRamp": ["oklch(15% 0.012 85)", "oklch(25% 0.012 85)", "oklch(37% 0.012 85)", "oklch(49% 0.012 85)", "oklch(61% 0.012 85)", "oklch(73% 0.012 85)", "oklch(85% 0.012 85)", "oklch(95% 0.012 85)"] },
+      "cargo": { "role": "primary", "displayName": "Cargo Orange", "canonical": "#f0561a", "tonalRamp": ["oklch(15% 0.19 40)", "oklch(25% 0.19 40)", "oklch(37% 0.19 40)", "oklch(49% 0.19 40)", "oklch(61% 0.19 40)", "oklch(73% 0.16 40)", "oklch(85% 0.1 40)", "oklch(95% 0.04 40)"] },
+      "transit": { "role": "secondary", "displayName": "Transit Blue", "canonical": "#6f9fd8", "tonalRamp": ["oklch(15% 0.09 255)", "oklch(25% 0.09 255)", "oklch(37% 0.09 255)", "oklch(49% 0.09 255)", "oklch(61% 0.09 255)", "oklch(73% 0.09 255)", "oklch(85% 0.07 255)", "oklch(95% 0.03 255)"] },
+      "delivered": { "role": "secondary", "displayName": "Delivered Green", "canonical": "#55b183", "tonalRamp": ["oklch(15% 0.09 155)", "oklch(25% 0.09 155)", "oklch(37% 0.09 155)", "oklch(49% 0.09 155)", "oklch(61% 0.09 155)", "oklch(73% 0.09 155)", "oklch(85% 0.07 155)", "oklch(95% 0.03 155)"] },
+      "hold": { "role": "secondary", "displayName": "Hold Amber", "canonical": "#d9a021", "tonalRamp": ["oklch(15% 0.11 85)", "oklch(25% 0.11 85)", "oklch(37% 0.11 85)", "oklch(49% 0.11 85)", "oklch(61% 0.11 85)", "oklch(73% 0.11 85)", "oklch(85% 0.09 85)", "oklch(95% 0.04 85)"] },
+      "exception": { "role": "secondary", "displayName": "Exception Red", "canonical": "#d4574c", "tonalRamp": ["oklch(15% 0.12 25)", "oklch(25% 0.12 25)", "oklch(37% 0.12 25)", "oklch(49% 0.12 25)", "oklch(61% 0.12 25)", "oklch(73% 0.1 25)", "oklch(85% 0.07 25)", "oklch(95% 0.03 25)"] },
+      "exception-deep": { "role": "secondary", "displayName": "Exception Deep", "canonical": "#b23c31", "tonalRamp": ["oklch(15% 0.12 25)", "oklch(25% 0.12 25)", "oklch(37% 0.12 25)", "oklch(49% 0.12 25)", "oklch(61% 0.12 25)", "oklch(73% 0.1 25)", "oklch(85% 0.07 25)", "oklch(95% 0.03 25)"] },
+      "hold-bg": { "role": "secondary", "displayName": "Hazard Yellow", "canonical": "#f5d54a", "tonalRamp": ["oklch(15% 0.1 95)", "oklch(25% 0.1 95)", "oklch(37% 0.1 95)", "oklch(49% 0.1 95)", "oklch(61% 0.12 95)", "oklch(73% 0.14 95)", "oklch(85% 0.14 95)", "oklch(95% 0.06 95)"] }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Headline", "purpose": "Page headings in condensed caps, usually over a 2px ink rule." },
+      "title": { "displayName": "Title", "purpose": "Card and project names." },
+      "body": { "displayName": "Body", "purpose": "Prose, descriptions, hints." },
+      "label": { "displayName": "Label", "purpose": "Field-box labels, table heads, section titles — the most-used style." },
+      "label-lg": { "displayName": "Label Large", "purpose": "Input labels, stamps (at 700), and small buttons — the 11px label step." },
+      "meta": { "displayName": "Meta", "purpose": "Hints, footnotes, file-input button text — the 12px prose step." },
+      "data": { "displayName": "Data", "purpose": "All numbers, dates, identifiers; tabular numerals forced on tables and dd." }
+    },
+    "shadows": [
+      { "name": "sheet", "value": "0 1px 2px rgb(0 0 0 / 0.3), 0 6px 16px -6px rgb(0 0 0 / 0.5)", "purpose": "Every waybill sheet at rest." },
+      { "name": "sheet-raised", "value": "0 2px 4px rgb(0 0 0 / 0.35), 0 12px 28px -8px rgb(0 0 0 / 0.6)", "purpose": "Hover lift on linked cards only." }
+    ],
+    "motion": [
+      { "name": "stamp-land", "value": "0.4s cubic-bezier(0.16, 1, 0.3, 1) both (scale 1.6→0.94→1, rotate -8°→-2°)", "purpose": "The one authored moment: a status stamp lands on load." },
+      { "name": "route-grow", "value": "0.7s cubic-bezier(0.16, 1, 0.3, 1) both (scaleX 0→1, origin left)", "purpose": "The traveled leg of a route line grows in on load." },
+      { "name": "shimmer-slide", "value": "1.4s ease-in-out infinite (background-position 100%→-100%)", "purpose": "Loading skeleton shimmer on sheet-dim." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Cargo-orange commit action; one per region.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">File note</button>",
+      "css": ".ds-btn { font-family: 'Barlow Condensed', 'Barlow', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.45rem 0.9rem; border: 1px solid #ece8dd; background: #1d1b17; color: #ece8dd; font-size: 0.75rem; line-height: 1.3; border-radius: 0; transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease; cursor: pointer; } .ds-btn:active { transform: translateY(1px); } .ds-btn-primary { background: #f0561a; border-color: #f0561a; color: #131110; } .ds-btn-primary:hover { background: #c74310; } .ds-btn:focus-visible { outline: 2px solid #ece8dd; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Default sheet-and-ink button for non-committing actions.",
+      "html": "<button class=\"ds-btn2\">Sign out</button>",
+      "css": ".ds-btn2 { font-family: 'Barlow Condensed', 'Barlow', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; display: inline-flex; align-items: center; padding: 0.45rem 0.9rem; border: 1px solid #ece8dd; background: #1d1b17; color: #ece8dd; font-size: 0.75rem; line-height: 1.3; border-radius: 0; transition: background-color 0.15s ease, transform 0.1s ease; cursor: pointer; } .ds-btn2:hover { background: #26231d; } .ds-btn2:active { transform: translateY(1px); } .ds-btn2:focus-visible { outline: 2px solid #ece8dd; outline-offset: 2px; }"
+    },
+    {
+      "name": "Void Button",
+      "kind": "button",
+      "refersTo": "button-void",
+      "description": "Destructive confirm, exception red; lives behind a DangerZone disclosure.",
+      "html": "<button class=\"ds-btn-void\">Delete project</button>",
+      "css": ".ds-btn-void { font-family: 'Barlow Condensed', 'Barlow', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; display: inline-flex; align-items: center; padding: 0.45rem 0.9rem; border: 1px solid #d4574c; background: #d4574c; color: #131110; font-size: 0.75rem; line-height: 1.3; border-radius: 0; transition: background-color 0.15s ease; cursor: pointer; } .ds-btn-void:hover { background: #b23c31; } .ds-btn-void:focus-visible { outline: 2px solid #ece8dd; outline-offset: 2px; }"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Square waybill field with caps label; caret in cargo orange.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Repository</span><input class=\"ds-input\" placeholder=\"owner/repo\" /></label>",
+      "css": ".ds-field { display: block; font-family: 'Barlow', system-ui, sans-serif; } .ds-field-label { display: block; margin-bottom: 0.25rem; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; color: #b3ac9c; } .ds-input { width: 100%; border: 1px solid #56514a; background: #1d1b17; padding: 0.5rem 0.75rem; font-size: 0.875rem; color: #ece8dd; border-radius: 0; caret-color: #f0561a; } .ds-input:focus { outline: none; border-color: #ece8dd; } .ds-input::placeholder { color: #b3ac9c; opacity: 1; }"
+    },
+    {
+      "name": "Status Stamp",
+      "kind": "chip",
+      "refersTo": "stamp",
+      "description": "Rubber status stamp with double-strike ghost ring, tilted -2°; tone via text color.",
+      "html": "<span class=\"ds-stamp\" style=\"color:#55b183\">Delivered</span> <span class=\"ds-stamp\" style=\"color:#6f9fd8\">In transit</span> <span class=\"ds-stamp\" style=\"color:#d9a021\">On hold</span>",
+      "css": ".ds-stamp { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px; border: 1.5px solid currentColor; outline: 1px solid color-mix(in srgb, currentColor 35%, transparent); outline-offset: 1.5px; padding: 0.1rem 0.45rem; display: inline-flex; align-items: center; gap: 0.35rem; line-height: 1.3; white-space: nowrap; transform: rotate(-2deg); margin-right: 0.75rem; }"
+    },
+    {
+      "name": "Waybill Card",
+      "kind": "card",
+      "refersTo": "sheet-card",
+      "description": "The primary surface: sheet with 1px ink border and paper shadow; lifts on hover when linked.",
+      "html": "<div class=\"ds-sheet\"><div class=\"ds-sheet-head\"><span class=\"ds-mono\">XS-0012</span><span class=\"ds-caps\">via github</span></div><h2 class=\"ds-sheet-title\">Marketing site rebuild</h2></div>",
+      "css": ".ds-sheet { background: #1d1b17; border: 1px solid #ece8dd; box-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 6px 16px -6px rgb(0 0 0 / 0.5); padding: 1.25rem; border-radius: 0; transition: box-shadow 0.15s ease; font-family: 'Barlow', system-ui, sans-serif; } .ds-sheet:hover { box-shadow: 0 2px 4px rgb(0 0 0 / 0.35), 0 12px 28px -8px rgb(0 0 0 / 0.6); } .ds-sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; border-bottom: 1px solid #34312a; padding-bottom: 0.5rem; margin-bottom: 0.75rem; } .ds-mono { font-family: 'Overpass Mono', monospace; font-size: 0.75rem; color: #b3ac9c; } .ds-caps { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-size: 10px; color: #b3ac9c; } .ds-sheet-title { font-size: 1.125rem; font-weight: 600; line-height: 1.375; color: #ece8dd; margin: 0; }"
+    },
+    {
+      "name": "Field Grid",
+      "kind": "custom",
+      "refersTo": "field-box",
+      "description": "Waybill field boxes with collapsed 1px ink borders: gap-px grid on an ink background.",
+      "html": "<dl class=\"ds-fieldgrid\"><div class=\"ds-fieldbox\"><dt>Tasks done</dt><dd>14/22</dd></div><div class=\"ds-fieldbox\"><dt>Est. total</dt><dd>36h</dd></div><div class=\"ds-fieldbox\"><dt>Remaining</dt><dd>12h</dd></div></dl>",
+      "css": ".ds-fieldgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; border: 1px solid #ece8dd; background: #ece8dd; margin: 0; } .ds-fieldbox { background: #1d1b17; padding: 0.5rem 0.75rem; } .ds-fieldbox dt { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-size: 10px; color: #b3ac9c; } .ds-fieldbox dd { margin: 0.125rem 0 0 0; font-family: 'Overpass Mono', monospace; font-variant-numeric: tabular-nums; font-size: 0.875rem; font-weight: 600; color: #ece8dd; }"
+    },
+    {
+      "name": "Route Line",
+      "kind": "custom",
+      "refersTo": "route-line",
+      "description": "Journey from kickoff to ETA: posts, checkpoint dots, cargo diamond at current position.",
+      "html": "<div class=\"ds-route\"><div class=\"ds-route-track\"><span class=\"ds-route-post ds-route-start\"></span><div class=\"ds-route-rail\"><div class=\"ds-route-fill\" style=\"width:62%\"></div><span class=\"ds-route-dot ds-dot-passed\" style=\"left:25%\"></span><span class=\"ds-route-dot ds-dot-passed\" style=\"left:50%\"></span><span class=\"ds-route-dot\" style=\"left:75%\"></span><span class=\"ds-route-pos\" style=\"left:62%\"></span></div><span class=\"ds-route-post ds-route-end\"></span></div><div class=\"ds-route-labels\"><span>Kickoff</span><strong>62%</strong><span>Sep 12</span></div></div>",
+      "css": ".ds-route-track { position: relative; display: flex; height: 1rem; align-items: center; } .ds-route-post { width: 0.5rem; height: 0.5rem; border-radius: 9999px; flex-shrink: 0; z-index: 2; } .ds-route-start { background: #ece8dd; } .ds-route-end { border: 2px solid #ece8dd; background: #1d1b17; } .ds-route-rail { position: relative; height: 2px; flex-grow: 1; background: #56514a; } .ds-route-fill { position: absolute; top: 0; bottom: 0; left: 0; background: #ece8dd; } .ds-route-dot { position: absolute; top: 50%; width: 0.375rem; height: 0.375rem; transform: translate(-50%, -50%); border-radius: 9999px; border: 1px solid #56514a; background: #131110; } .ds-dot-passed { background: #ece8dd; border: none; } .ds-route-pos { position: absolute; top: 50%; z-index: 2; width: 0.625rem; height: 0.625rem; transform: translate(-50%, -50%) rotate(45deg); border: 1px solid #ece8dd; background: #f0561a; } .ds-route-labels { margin-top: 0.25rem; display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; font-family: 'Overpass Mono', monospace; font-size: 10px; color: #b3ac9c; } .ds-route-labels strong { color: #ece8dd; font-weight: 600; }"
+    },
+    {
+      "name": "Hazard Band",
+      "kind": "nav",
+      "refersTo": "hazard-band",
+      "description": "Inspection (impersonation) banner: fixed yellow/black hazard tape, never themed.",
+      "html": "<div class=\"ds-hazard\"><span class=\"ds-hazard-text\">Inspection mode — viewing as Acme Co</span><button class=\"ds-hazard-btn\">Return to dispatch</button></div>",
+      "css": ".ds-hazard { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.375rem 1rem; border-bottom: 2px solid #131110; background: repeating-linear-gradient(-45deg, #f5d54a 0, #f5d54a 14px, #e3c33e 14px, #e3c33e 28px); } .ds-hazard-text { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; color: #131110; } .ds-hazard-btn { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; border: 1px solid #131110; background: #131110; color: #f5d54a; padding: 0.25rem 0.625rem; border-radius: 0; cursor: pointer; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Night Dispatch",
+    "overview": "A commissioned project is a tracked consignment. Every screen is a dispatch desk at night: a near-black desk with faint horizontal ledger ruling, dark waybill sheets laid on top of it, and light paper-ink lettering ruled into field boxes. Status is not a badge — it is a rubber stamp, tilted two degrees, with the ghost ring of a double strike. Progress is not a bar — it is a route line from kickoff to ETA with checkpoint dots and an orange position diamond. The system deliberately refuses the dark-zinc SaaS card dashboard its category ships by default: no rounded cards, no glyph icon rows, no gradient accents.\n\nThe world is dark-only by user-pinned commitment: color-scheme: dark and no prefers-color-scheme branches anywhere. Density is ledger-like — small caps labels over mono values, hairline rules, tabular numerals — but the sheets breathe with 20px internal padding and a strict 1px light-ink border that makes each surface read as a physical document.",
+    "keyCharacteristics": [
+      "Dark-only night-dispatch ground (#131110) with document-like sheets (#1d1b17)",
+      "Light \"paper ink\" does the structural work: borders, headings, meters",
+      "International orange is the only action color; status colors are stamp inks",
+      "Zero border-radius on every rectangle; circles exist only as route posts/dots",
+      "Condensed caps labels + mono data + regular Barlow prose, everywhere",
+      "Motion is rationed to two authored moments: stamp-land and route-grow"
+    ],
+    "rules": [
+      { "name": "The Stamp Ink Rule", "body": "Each signal color carries exactly one logistics meaning — orange commits, blue transits, green delivers, amber holds, red excepts, yellow inspects. Never repurpose a signal for decoration.", "section": "colors" },
+      { "name": "The Ink Does the Work Rule", "body": "Structure (borders, headings, progress fill, focus rings) is drawn in light ink (#ece8dd), not in accent colors. Signals appear only where a status or action genuinely exists.", "section": "colors" },
+      { "name": "The Mono Data Rule", "body": "Every identifier, number, date, and percentage is set in Overpass Mono. If it could appear on a printed waybill as a value, it is mono.", "section": "typography" },
+      { "name": "The Caps Label Rule", "body": "Labels are Barlow Condensed, uppercase, 0.08em tracked (.label-caps); stamps push to 700 weight and 0.1em. Prose is never uppercased.", "section": "typography" },
+      { "name": "The Two Shadows Rule", "body": "The system owns exactly two shadows — sheet at rest, sheet-raised on hover. No glows, no colored shadows, no hard offsets.", "section": "elevation" },
+      { "name": "The Square Corner Rule", "body": "Nothing gets a border-radius. Roundness is reserved for route posts and checkpoint dots.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do keep the world dark-only: color-scheme: dark, no prefers-color-scheme branches, no light theme (user-pinned commitment).",
+      "Do draw structure in ink (#ece8dd) — 1px sheet borders, 2px heading rules — and reserve signal colors for real status and actions.",
+      "Do set every number, date, and identifier in Overpass Mono with tabular numerals; every label in Barlow Condensed caps at 0.08em.",
+      "Do build multi-value readouts as FieldGrids: gap-px grids on an ink background so 1px collapsed borders emerge.",
+      "Do carry the world into browser surfaces: orange selection and caret, thin rule-mid scrollbars, ink focus-visible outline.",
+      "Do ration motion to the authored moments (stamp-land, route-grow, shimmer) and honor reduced-motion."
+    ],
+    "donts": [
+      "Don't round a corner on any rectangle — circles belong to route posts and dots only.",
+      "Don't introduce glyph/icon sets; the barcode strip is the only pictorial mark.",
+      "Don't use gradients except the three functional ones: desk ruling, hazard striping, shimmer.",
+      "Don't theme the hazard band; inspection yellow/black is fixed in any light.",
+      "Don't add shadows beyond sheet and sheet-raised, or use shadows to signal status.",
+      "Don't put cargo orange on more than the single committing element of a region; status text stays in its stamp ink."
+    ]
+  }
+}

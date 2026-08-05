@@ -5,21 +5,22 @@ import { PendingButton } from "./PendingButton";
 /**
  * Renders only when an admin session is present on a client page — i.e. an
  * xSingularity member is "viewing as" a client. Gives them a way back to admin.
+ * Hazard tape is physically yellow + black in any light, so its colors are fixed.
  */
 export async function ImpersonationBanner({ companyName }: { companyName: string }) {
   const admin = await getAdmin();
   if (!admin) return null;
 
   return (
-    <div className="border-b border-amber-500/30 bg-amber-500/10">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2 text-sm">
-        <span className="text-amber-300">
-          Viewing as <span className="font-medium">{companyName}</span> — signed in as xSingularity
-          admin <span className="text-amber-400/70">({admin})</span>
+    <div className="hazard-band border-b-2 border-[#131110]">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-1.5">
+        <span className="label-caps text-xs text-[#131110]">
+          Inspection mode — viewing as {companyName}
+          <span className="ml-1 font-mono font-normal normal-case tracking-normal">({admin})</span>
         </span>
         <form action={stopImpersonating}>
-          <PendingButton className="rounded-md border border-amber-500/40 px-3 py-1 text-xs font-medium text-amber-200 transition hover:bg-amber-500/20">
-            ← Return to admin
+          <PendingButton className="btn border-[#131110] bg-[#131110] px-2.5 py-1 text-[11px] text-hold-bg hover:bg-[#131110]">
+            Return to dispatch
           </PendingButton>
         </form>
       </div>
